@@ -641,8 +641,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -660,8 +660,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -679,8 +679,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -689,8 +689,8 @@
         "id": "efc61015-f7d6-4803-bdc4-b469098d8120",
         "type": "Label",
         "position": {
-          "x": 1162.0843360405713,
-          "y": 296.5521227726229
+          "x": 1159.0843360405713,
+          "y": 298.5521227726229
         },
         "data": {
           "label": "1",
@@ -698,8 +698,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -786,7 +786,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -804,8 +804,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1072,8 +1072,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1092,7 +1092,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1105,13 +1105,13 @@
           "y": 757.5
         },
         "data": {
-          "label": "1",
+          "label": "N",
           "isSelected": false,
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1130,7 +1130,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1143,13 +1143,13 @@
           "y": 759.5
         },
         "data": {
-          "label": "1",
+          "label": "N",
           "isSelected": false,
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1168,7 +1168,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1186,8 +1186,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1206,7 +1206,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1423,7 +1423,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1441,8 +1441,8 @@
           "isConnectable": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1644,9 +1644,9 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
-        "selected": true,
+        "selected": false,
         "dragging": false
       },
       {
@@ -1661,8 +1661,8 @@
           "isSelected": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1679,8 +1679,8 @@
           "isSelected": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1697,8 +1697,8 @@
           "isSelected": false
         },
         "measured": {
-          "width": 27,
-          "height": 44
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1716,7 +1716,7 @@
         },
         "measured": {
           "width": 34,
-          "height": 44
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -1733,8 +1733,8 @@
           "isSelected": false
         },
         "measured": {
-          "width": 32,
-          "height": 44
+          "width": 31,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -2217,18 +2217,18 @@
       }
     ],
     "viewport": {
-      "x": 242.81081012670984,
-      "y": 15.173296826478008,
-      "zoom": 0.757858283255199
+      "x": -63.2477869088425,
+      "y": -332.92046555497507,
+      "zoom": 1.0000000000000004
     }
   },
-  "name": "A08_DBMS_Project",
+  "name": "A08_DBMS_ER",
   "folder": {
     "name": "Diagrams",
     "folderType": 1,
     "depth": 0,
-    "id": 278189
+    "id": 281408
   },
-  "id": 369145,
-  "updatedAtTimestamp": 1774612049
+  "id": 375383,
+  "updatedAtTimestamp": 1774712776
 }
