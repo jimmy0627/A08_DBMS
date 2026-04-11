@@ -617,8 +617,8 @@
         "id": "df668f7b-fa4b-453e-999c-bc06f555c360",
         "type": "Entity",
         "position": {
-          "x": 323.40429552376173,
-          "y": 599.4508313676337
+          "x": 276.40429552376173,
+          "y": 581.6082387750412
         },
         "data": {
           "label": "Guide",
@@ -1221,8 +1221,8 @@
         "parentId": "df668f7b-fa4b-453e-999c-bc06f555c360",
         "type": "Attribute",
         "position": {
-          "x": 5.291161386994759,
-          "y": -93.45204949230344
+          "x": -50.264394168560784,
+          "y": -125.85945689971089
         },
         "data": {
           "label": "Date",
@@ -1521,8 +1521,8 @@
         "id": "be778b73-a4f4-4267-9a65-2fd03578a216",
         "type": "Entity",
         "position": {
-          "x": -117.46331906784513,
-          "y": 159.99414542584577
+          "x": -102.58368943821557,
+          "y": 110.43967102784478
         },
         "parentId": "64499623-fdb9-4f5e-b1e7-57013917043e",
         "data": {
@@ -1590,8 +1590,8 @@
         "id": "eba7b0b8-6d50-4e37-9097-85146d64c776",
         "type": "Relationship",
         "position": {
-          "x": 658.9630217296561,
-          "y": 597.364229151561
+          "x": 643.8058560645521,
+          "y": 586.7542131859882
         },
         "data": {
           "label": "Create",
@@ -1615,8 +1615,8 @@
         "id": "980e6b6f-b0ff-475c-8c5b-0cf07e304a5e",
         "type": "Label",
         "position": {
-          "x": 420.36494412049524,
-          "y": 589.5913692707296
+          "x": 379.36494412049524,
+          "y": 597.5913692707296
         },
         "data": {
           "label": "N",
@@ -1913,8 +1913,8 @@
         "id": "7b2573da-8843-4df2-94f1-929ee881464c",
         "type": "Relationship",
         "position": {
-          "x": 319.44787896355433,
-          "y": 1057.3737966921178
+          "x": 287.617831066836,
+          "y": 1052.8266469925866
         },
         "data": {
           "label": "Related_to",
@@ -1943,7 +1943,8 @@
         },
         "data": {
           "label": "1",
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 26,
@@ -1956,15 +1957,16 @@
         "id": "b9756772-d728-43bd-b9ca-33a4f7eda352",
         "type": "Label",
         "position": {
-          "x": 369.0136689356626,
-          "y": 638.9434865403144
+          "x": 325.0578885068611,
+          "y": 632.8806202742729
         },
         "data": {
-          "label": "M",
-          "isSelected": false
+          "label": "N",
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
-          "width": 34,
+          "width": 31,
           "height": 43
         },
         "selected": false,
@@ -1981,7 +1983,8 @@
         "data": {
           "label": "Current_Level",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2001,7 +2004,8 @@
         "data": {
           "label": "Target_Level",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2021,7 +2025,8 @@
         "data": {
           "label": "Current_Elite",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2041,7 +2046,8 @@
         "data": {
           "label": "Target_Elite",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2061,7 +2067,8 @@
         "data": {
           "label": "Current_Skill",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2081,7 +2088,8 @@
         "data": {
           "label": "Target_Skill",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2101,7 +2109,8 @@
         "data": {
           "label": "Title",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2121,7 +2130,8 @@
         "data": {
           "label": "Status",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2141,7 +2151,8 @@
         "data": {
           "label": "Video_Url",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2161,7 +2172,8 @@
         "data": {
           "label": "Banned_by_adminid",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2181,7 +2193,8 @@
         "data": {
           "label": "Banned_Date",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2201,7 +2214,8 @@
         "data": {
           "label": "Banned_Reason",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2221,7 +2235,8 @@
         "data": {
           "label": "Elits_Stage",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2241,7 +2256,8 @@
         "data": {
           "label": "Skill_Level",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2261,7 +2277,8 @@
         "data": {
           "label": "Module_Stage",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2281,7 +2298,8 @@
         "data": {
           "label": "Expected_ap_cost",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
@@ -2301,11 +2319,74 @@
         "data": {
           "label": "Byproduct_Possibility",
           "types": [],
-          "isSelected": false
+          "isSelected": false,
+          "isConnectable": false
         },
         "measured": {
           "width": 100,
           "height": 50
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "db221085-d7ba-495a-9fb5-be2ee2f75b16",
+        "type": "Relationship",
+        "position": {
+          "x": 381.6597288905855,
+          "y": 521.247703737209
+        },
+        "data": {
+          "label": "Ban",
+          "sourceEntityDetails": {
+            "id": "df668f7b-fa4b-453e-999c-bc06f555c360"
+          },
+          "targetEntityDetails": {
+            "id": "be778b73-a4f4-4267-9a65-2fd03578a216",
+            "exactConstraints": []
+          },
+          "isSelected": false,
+          "isConnectable": true
+        },
+        "measured": {
+          "width": 100,
+          "height": 50
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "2fe9e90d-8995-482d-a32c-016b69ac4aaf",
+        "type": "Label",
+        "position": {
+          "x": 342.5225184045435,
+          "y": 547.8348307261859
+        },
+        "data": {
+          "label": "N",
+          "isSelected": false
+        },
+        "measured": {
+          "width": 31,
+          "height": 43
+        },
+        "selected": false,
+        "dragging": false
+      },
+      {
+        "id": "06621d29-59ce-41c6-8c6d-421d8062968c",
+        "type": "Label",
+        "position": {
+          "x": 492.1896647229717,
+          "y": 504.7496008606805
+        },
+        "data": {
+          "label": "1",
+          "isSelected": false
+        },
+        "measured": {
+          "width": 26,
+          "height": 43
         },
         "selected": false,
         "dragging": false
@@ -2861,12 +2942,28 @@
         "type": "Attribute",
         "source": "7d7eca50-eb13-469e-b528-fac621270d2b",
         "target": "c88f1a6e-a13b-4e1f-8ba9-d86708c49807"
+      },
+      {
+        "id": "db221085-d7ba-495a-9fb5-be2ee2f75b16->df668f7b-fa4b-453e-999c-bc06f555c360;df668f7b-fa4b-453e-999c-bc06f555c360->be778b73-a4f4-4267-9a65-2fd03578a216",
+        "type": "Relationship",
+        "source": "db221085-d7ba-495a-9fb5-be2ee2f75b16",
+        "target": "df668f7b-fa4b-453e-999c-bc06f555c360"
+      },
+      {
+        "id": "db221085-d7ba-495a-9fb5-be2ee2f75b16->be778b73-a4f4-4267-9a65-2fd03578a216;df668f7b-fa4b-453e-999c-bc06f555c360->be778b73-a4f4-4267-9a65-2fd03578a216",
+        "type": "Relationship",
+        "source": "db221085-d7ba-495a-9fb5-be2ee2f75b16",
+        "target": "be778b73-a4f4-4267-9a65-2fd03578a216",
+        "data": {
+          "id": "db221085-d7ba-495a-9fb5-be2ee2f75b16->be778b73-a4f4-4267-9a65-2fd03578a216",
+          "exactConstraints": []
+        }
       }
     ],
     "viewport": {
-      "x": -179.32019502592766,
-      "y": -405.76249021938906,
-      "zoom": 1.6319709327939087
+      "x": -82.8004682323126,
+      "y": -227.3130611371795,
+      "zoom": 1.0000000000000009
     }
   },
   "name": "A08_DBMS_Project",
@@ -2874,8 +2971,8 @@
     "name": "Diagrams",
     "folderType": 1,
     "depth": 0,
-    "id": 278189
+    "id": 281408
   },
-  "id": 369145,
-  "updatedAtTimestamp": 1775888141
+  "id": 404785,
+  "updatedAtTimestamp": 1775918935
 }
