@@ -40,4 +40,10 @@ urlpatterns = [
     path('guides/comments/create/', views.create_guide_comment),
     # 刪除攻略留言
     path('guides/<int:guide_id>/comments/delete/', views.delete_guide_comment),
+
+    # 載入攻略資料
+    # 等等補
+    
+    # 載入幹員詳細資料
+    # 等等補
 ]

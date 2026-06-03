@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'arkwikidatabase',   
         'USER': 'root',                
-        'PASSWORD': 'Tt0925700515',         
+        'PASSWORD': 'jimmy0627',         
         'HOST': '127.0.0.1',           
         'PORT': '3306',                
         'OPTIONS': {

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rhodes Island Database // Arknights Wiki</title>
+  <meta name="description" content="Arknights wiki homepage inspired by Rhodes Island terminal design.">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <script defer src="/javascripts/homepage.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo">RHODES ISLAND DATABASE</div>
+      <div class="header-search">
+        <input type="text" placeholder="搜尋幹員、素材、關卡...">
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline"><span class="icon">⚙</span> ADMIN</button>
+        <button class="btn btn-filled"><span class="icon">👤</span> LOGIN</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <!-- Top Row -->
+      <div class="dashboard-top">
+        <section class="greeting-section">
+          <h1>歡迎歸來，博士</h1>
+          <p class="subtitle">羅德島攻略資訊終端 // TERMINAL</p>
+          <div class="briefing-box">
+            <p>正在連線至羅德島數據庫...<br>
+            身為指揮官，您隨時可以在此查閱最新的幹員機密檔案、關卡掉落數據與戰術指南。</p>
+          </div>
+        </section>
+
+        <section class="event-section panel">
+          <div class="event-card">
+            <div class="event-meta">
+              <span class="count">21</span>
+              <p>活動倒數 / DAYS</p>
+              <span class="status-badge">CURRENT EVENT</span>
+            </div>
+            <div class="event-content">
+              <h2>惡兆湍流</h2>
+              <p class="event-desc">危機合約：起源行動 // 點擊查看總覽</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Middle Row -->
+      <div class="dashboard-middle">
+        <div class="guide-grid">
+          <article class="guide-card panel">
+            <div class="card-header">編隊 // GUIDE</div>
+            <h3>主線 H14-4 突襲</h3>
+            <p>低配平民作業</p>
+            <span class="arrow">›</span>
+          </article>
+          <article class="guide-card panel">
+            <div class="card-header">幹員 // GUIDE</div>
+            <h3>瑪恩納專精推薦</h3>
+            <p>模組升級指南</p>
+          </article>
+        </div>
+
+        <article class="wide-guide panel">
+          <div class="guide-info">
+            <p class="card-header">活動解析 // LATEST GUIDE</p>
+            <h3>生息演算：沙洲遺聞</h3>
+            <p>開局黃金 3 天運營思路</p>
+          </div>
+          <button class="btn-read-more">READ MORE</button>
+        </article>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="dashboard-bottom">
+        <section class="personnel-section">
+          <div class="breaking-news">BREAKING NEWS</div>
+          <div class="personnel-header">
+            <div class="section-title">最新幹員情報 / PERSONNEL UPDATE</div>
+            <a href="/operators" class="view-all-link">查看全部 / VIEW ALL ›</a>
+          </div>
+          <div class="operators-list">
+            <div class="op-card">
+              <div class="op-thumb"></div>
+              <div class="op-tag birthday">今日生日</div>
+              <p>阿米婭</p>
+            </div>
+            <div class="op-card">
+              <div class="op-thumb"></div>
+              <div class="op-tag">近期新增</div>
+              <p>瑪恩納</p>
+            </div>
+            <div class="op-card">
+              <div class="op-thumb"></div>
+              <div class="op-tag">近期新增</div>
+              <p>塑心</p>
+            </div>
+          </div>
+        </section>
+
+        <nav class="quick-links">
+          <a href="/operators" class="link-btn">幹員列表</a>
+          <a href="#" class="link-btn"><span class="new-tag">NEW</span> 素材查詢</a>
+          <a href="#" class="link-btn">個人幹員庫</a>
+        </nav>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>PRTS // Rhodes Island Database Interface</p>
+    </footer>
+  </div>
+  <script type="module" src="/javascripts/homepage.js"></script>
+</body>
+</html>

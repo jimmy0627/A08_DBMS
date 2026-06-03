@@ -380,14 +380,32 @@ def create_stage(request):
             print(f"[Create Stage Error]: {e}")
             return JsonResponse({"status": "error", "message": "關卡建立失敗，資料庫寫入異常"}, status=500)
 
-# 14.【Read 查詢】查詢所有幹員圖鑑簡清單 (對應 GET 請求)
+
 def get_operator_list(request):
     try:
         with connection.cursor() as cursor:
+            # 修正 1：全部改為小寫 (包含資料表與 WHERE 條件)
+            # 修正 2：將 o.class 加上反引號 o.`class` 避免保留字衝突
             sql = """
-                SELECT o.operator_id, o.name, p.illustrator, p.voice_actor 
+SELECT 
+                    o.operator_id, 
+                    o.name, 
+                    o.rarity, 
+                    o.`class`, 
+                    o.sex, 
+                    o.branch, 
+                    o.position,
+                    s.hp, 
+                    s.atk, 
+                    s.def, 
+                    s.cost, 
+                    s.stop_amount, 
+                    s.deploy_cd, 
+                    s.atk_cd,
+                    s.res
                 FROM operator o
-                LEFT JOIN operator_profile p ON o.operator_id = p.operator_id
+                LEFT JOIN op_state s ON o.operator_id = s.operator_id
+                WHERE s.elite = 2 AND s.level = 90
             """
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -397,16 +415,32 @@ def get_operator_list(request):
                 op_data = {
                     "operator_id": r[0],
                     "name": r[1],
-                    "illustrator": r[2],
-                    "voice_actor": r[3]
+                    "rarity": r[2],
+                    "class": r[3],
+                    "sex": r[4],
+                    "branch": r[5],
+                    "position": r[6],
+                    "hp": r[7],
+                    "atk": r[8],
+                    "def": r[9],
+                    "cost": r[10],
+                    "block": r[11],
+                    "redeploy": r[12],
+                    "atk_spd": r[13],
+                    "res": r[14] 
                 }
                 result.append(op_data)
                 
-            return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
+            return JsonResponse({
+                "status": "success", 
+                "data": result
+            }, json_dumps_params={'ensure_ascii': False})
             
     except DatabaseError as e:
-        print(f"[DB Error]: {e}")
-        return JsonResponse({"status": "error", "message": "無法取得幹員清單"}, status=500)
+        # 強烈建議：如果再報錯，請查看終端機印出的這行錯誤訊息
+        # 它會明確告訴你是哪個欄位或語法出錯
+        print(f"========== [資料庫 SQL 錯誤] ==========\n{e}\n=======================================")
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
     
 # 15.【Read 查詢】查詢特定玩家持有的所有幹員練度清單 (對應 GET 請求)
 def get_user_roster(request, user_id):

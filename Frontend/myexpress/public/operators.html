@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operator List // Rhodes Island Database</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script defer src="/javascripts/operators.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo"><a href="/">RHODES ISLAND DATABASE</a></div>
+      <div class="header-search">
+        <input type="text" id="global-search" placeholder="搜尋幹員代號、職業...">
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline"><span class="icon">⚙</span> ADMIN</button>
+        <button class="btn btn-filled"><span class="icon">👤</span> LOGIN</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="db-header">
+        <div class="title-group">
+          <h1>幹員檔案總覽</h1>
+          <p class="subtitle">OPERATOR DATABASE // PERSONNEL LIST</p>
+        </div>
+        
+        <div class="filter-actions">
+          
+          <div class="dropdown-container">
+            <button class="btn btn-outline" id="btn-filter"><span class="icon">▽</span> 全部職業</button>
+            <div class="dropdown-menu" id="menu-filter">
+              </div>
+          </div>
+
+          <div class="dropdown-container">
+            <button class="btn btn-outline" id="btn-sort"><span class="icon">⇅</span> 星級排序</button>
+            <div class="dropdown-menu" id="menu-sort">
+              <button class="dropdown-item active" data-sort="rarity" data-order="desc">星級 (高 ➔ 低)</button>
+              <button class="dropdown-item" data-sort="rarity" data-order="asc">星級 (低 ➔ 高)</button>
+              <button class="dropdown-item" data-sort="hp" data-order="desc">生命值 (高 ➔ 低)</button>
+              <button class="dropdown-item" data-sort="atk" data-order="desc">攻擊力 (高 ➔ 低)</button>
+              <button class="dropdown-item" data-sort="def" data-order="desc">防禦力 (高 ➔ 低)</button>
+              <button class="dropdown-item" data-sort="cost" data-order="asc">部署費用 (低 ➔ 高)</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="list-labels-bar">
+        <span class="label-portrait">PORTRAIT</span>
+        <span class="label-info">BASIC INFO</span>
+        <span class="label-stats">COMBAT STATS (MAX LEVEL)</span>
+        <span class="label-action">ACTION</span>
+      </div>
+
+      <div id="operators-list-container" class="operator-list-grid">
+        <div class="loading-state">
+          <div class="terminal-loader">正在連線至人事數據庫</div>
+        </div>
+      </div>
+
+      <div class="pagination-footer">
+        <button id="load-more" class="btn-load-more">+ LOAD MORE OPERATORS +</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>PRTS // PERSONNEL ARCHIVE v2.0</p>
+    </footer>
+  </div>
+</body>
+</html>
