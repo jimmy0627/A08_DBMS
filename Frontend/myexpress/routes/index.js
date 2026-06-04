@@ -16,4 +16,9 @@ router.get('/operators', function(req, res, next) {
   res.sendFile(path.join(__dirname, '../public/operators.html'));
 });
 
+/* GET operator detail page. */
+router.get('/operator/:id', function(req, res, next) {
+  res.sendFile(path.join(__dirname, '../public/operator.html'));
+});
+
 export default router;

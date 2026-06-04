@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Material Inventory // Rhodes Island Database</title>
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <script src="/javascripts/auth.js"></script>
+  <style>
+    /* Material Specific Styles (PRTS Style) */
+    .inventory-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* Filter Panel */
+    .command-center {
+        background: rgba(17, 17, 17, 0.9);
+        border: 1px solid var(--border);
+        padding: 24px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .tier-btn {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 8px 16px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .tier-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--teal);
+    }
+
+    .tier-btn.active {
+        background: var(--teal);
+        color: #000;
+        border-color: var(--teal);
+    }
+
+    /* Material Table */
+    .material-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .list-header {
+        display: grid;
+        grid-template-columns: 350px 1fr 180px 120px;
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 2px solid var(--border);
+        font-size: 0.7rem;
+        color: var(--teal);
+        font-weight: 900;
+        letter-spacing: 0.1em;
+    }
+
+    .material-row {
+        display: grid;
+        grid-template-columns: 350px 1fr 180px 120px;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 16px 24px;
+        transition: all 0.2s;
+    }
+
+    .material-row:hover {
+        background: rgba(41, 182, 246, 0.04);
+        border-color: var(--teal);
+        transform: translateX(4px);
+    }
+
+    /* Column 1: Identity */
+    .col-identity {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .item-icon {
+        width: 48px;
+        height: 48px;
+        background: #111;
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #222;
+        font-size: 1.5rem;
+        position: relative;
+    }
+
+    .item-icon::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border-style: solid;
+        border-width: 0 0 8px 8px;
+        border-color: transparent transparent var(--border) transparent;
+    }
+
+    /* Column 2: Best Drop */
+    .drop-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stage-badge {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .ap-cost {
+        font-size: 0.75rem;
+        color: var(--muted);
+    }
+
+    .rate-tag {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        margin-left: 8px;
+    }
+
+    /* Column 3: Usage */
+    .usage-stats {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .count-val {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--teal);
+    }
+
+    .usage-label {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-left: 4px;
+    }
+
+    /* Rarity Classes */
+    .tier-5 { border-color: #FFB300 !important; } /* 金 */
+    .tier-4 { border-color: #E040FB !important; } /* 紫 */
+    .tier-3 { border-color: #29B6F6 !important; } /* 藍 */
+    .tier-2 { border-color: #8BC34A !important; } /* 綠 */
+    .tier-1 { border-color: #9E9E9E !important; } /* 白 */
+
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo">RHODES ISLAND DATABASE</div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="location.href='/'">BACK TO TERMINAL //</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="inventory-container">
+        
+        <section class="command-center">
+          <div class="header-search" style="margin: 0; width: 100%;">
+            <input type="text" id="mat-search" placeholder="INPUT MATERIAL NAME OR STAGE CODE... // 搜尋物資名稱、關卡代號...">
+          </div>
+          <div class="filter-group">
+            <button class="tier-btn active" data-tier="all">ALL</button>
+            <button class="tier-btn" data-tier="5" style="color: #FFB300;">T5</button>
+            <button class="tier-btn" data-tier="4" style="color: #E040FB;">T4</button>
+            <button class="tier-btn" data-tier="3" style="color: #29B6F6;">T3</button>
+            <button class="tier-btn" data-tier="2" style="color: #8BC34A;">T2</button>
+            <button class="tier-btn" data-tier="1" style="color: #9E9E9E;">T1</button>
+          </div>
+        </section>
+
+        <section class="material-list">
+          <div class="list-header">
+            <div>ITEM // 物資識別</div>
+            <div>BEST DROP // 推薦獲取途徑</div>
+            <div>USAGE // 需求概況</div>
+            <div>ACTION // 操作</div>
+          </div>
+          <div id="materials-container">
+            <!-- Data will be injected here -->
+            <div class="loading-state">SYNCHRONIZING WITH LOGISTICS DATABASE...</div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>PRTS // Logistics Division - Material Assets Management</p>
+    </footer>
+  </div>
+
+  <script src="/javascripts/materials.js"></script>
+</body>
+</html>

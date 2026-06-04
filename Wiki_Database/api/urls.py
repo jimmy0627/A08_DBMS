@@ -32,18 +32,23 @@ urlpatterns = [
     path('stages/create/', views.create_stage),
     # 獲取全幹員圖鑑清單
     path('operators/list/', views.get_operator_list),
+    # 獲取素材圖鑑清單
+    path('materials/list/', views.get_materials_list),
     
     # 獲取特定玩家的持有小隊練度
     path('users/<int:user_id>/roster/', views.get_user_roster),
+    # 將幹員加入持有名單
+    path('operators/roster/add/', views.add_to_roster),
+    # 從持有名單移除幹員
+    path('users/<int:user_id>/operators/<int:op_id>/delete/', views.delete_from_roster),
+    # 獲取玩家發布的攻略
+    path('users/<int:user_id>/guides/', views.get_user_guides),
     
     # 新增攻略留言
     path('guides/comments/create/', views.create_guide_comment),
     # 刪除攻略留言
     path('guides/<int:guide_id>/comments/delete/', views.delete_guide_comment),
-
-    # 載入攻略資料
-    # 等等補
     
     # 載入幹員詳細資料
-    # 等等補
+    path('operator/<str:op_id>/detail/', views.get_operator_detail),
 ]

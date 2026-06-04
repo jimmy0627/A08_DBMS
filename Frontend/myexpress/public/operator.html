@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operator Detail // Rhodes Island Database</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="/javascripts/auth.js"></script>
+  <script defer src="/javascripts/operator.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo"><a href="/">RHODES ISLAND DATABASE</a></div>
+      <div class="header-search">
+        <input type="text" id="global-search" placeholder="搜尋..." disabled>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="location.href='/operators'">BACK TO LIST</button>
+      </div>
+    </header>
+
+    <main class="operator-detail-container" id="detail-container">
+      <div class="loading-state">
+        <div class="terminal-loader">正在讀取人事檔案...</div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>PRTS // PERSONNEL ARCHIVE v2.0</p>
+    </footer>
+  </div>
+</body>
+</html>
