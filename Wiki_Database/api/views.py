@@ -452,11 +452,12 @@ def create_stage(request):
 def get_operator_list(request):
     try:
         with connection.cursor() as cursor:
-            # 對齊新欄位：撈取 max_level, max_hp, max_atk, max_def, max_res
+            # 補上 cost, stop_amount, deploy_cd, atk_cd
             sql = """
                 SELECT 
                     o.operator_id, o.name, o.rarity, o.`class`, o.sex, o.branch, o.position,
-                    s.max_hp, s.max_atk, s.max_def, s.max_res
+                    s.max_hp, s.max_atk, s.max_def, s.max_res,
+                    s.cost, s.stop_amount, s.deploy_cd, s.atk_cd
                 FROM operator o
                 LEFT JOIN op_state s ON o.operator_id = s.operator_id
                 JOIN (
@@ -473,7 +474,8 @@ def get_operator_list(request):
                 result.append({
                     "operator_id": r[0], "name": r[1], "rarity": r[2], "class": r[3],
                     "sex": r[4], "branch": r[5], "position": r[6],
-                    "hp": r[7], "atk": r[8], "def": r[9], "res": r[10] # 顯示該幹員最高練度頂點
+                    "hp": r[7], "atk": r[8], "def": r[9], "res": r[10],
+                    "cost": r[11], "block": r[12], "redeploy": r[13], "atk_spd": r[14] 
                 })
                 
             return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
@@ -737,82 +739,135 @@ def delete_guide_comment(request, guide_id):
         except DatabaseError as e:
             print(f"[Delete Comment Error]: {e}")
             return JsonResponse({"status": "error", "message": "刪除留言失敗，資料庫操作異常"}, status=500)
-# 18.【Read 查詢】查詢特定幹員詳細資料
+# 18.【Read 查詢】查詢特定幹員詳細資料 (包含基礎、數值區間、標籤、檔案、技能、模組)
 def get_operator_detail(request, op_id):
     try:
         with connection.cursor() as cursor:
-            # 1. 基礎資料
+            # ==========================================
+            # 1. 基礎資料 (Operator 基本屬性)
+            # ==========================================
             sql_basic = "SELECT operator_id, name, rarity, `class`, sex, branch, position FROM operator WHERE operator_id = %s"
             cursor.execute(sql_basic, [op_id])
             basic_row = cursor.fetchone()
-            if not basic_row:
-                return JsonResponse({"status": "error", "message": "找不到該幹員"}, status=404)
             
+            # 防禦機制：如果亂打網址 ID 找不到幹員，回傳 404
+            if not basic_row:
+                return JsonResponse({"status": "error", "message": "找不到該幹員的人事檔案"}, status=404)
+            
+            # 初始化回傳用的字典
             operator = {
-                "id": basic_row[0], "name": basic_row[1], "rarity": int(basic_row[2]) if basic_row[2] else 1,
-                "class": basic_row[3], "sex": basic_row[4], "branch": basic_row[5], "position": basic_row[6]
+                "id": basic_row[0],
+                "name": basic_row[1],
+                "rarity": int(basic_row[2]) if basic_row[2] else 1,
+                "class": basic_row[3],
+                "sex": basic_row[4],
+                "branch": basic_row[5],
+                "position": basic_row[6]
             }
 
-            # 2. 數值 (配合新 schema 撈取上下限區間)
+            # ==========================================
+            # 2. 數值區間 (對齊最新 op_state 結構)
+            # ==========================================
             sql_stats = """
-                SELECT elite_stage, max_level, min_hp, max_hp, min_atk, max_atk, min_def, max_def, min_res, max_res 
-                FROM op_state WHERE operator_id = %s ORDER BY elite_stage ASC
+                SELECT elite_stage, max_level, min_hp, max_hp, min_atk, max_atk, min_def, max_def, min_res, max_res,
+                       cost, stop_amount, deploy_cd, atk_cd
+                FROM op_state 
+                WHERE operator_id = %s 
+                ORDER BY elite_stage ASC
             """
             cursor.execute(sql_stats, [op_id])
             stats_rows = cursor.fetchall()
+            
             operator["all_stats"] = []
             for r in stats_rows:
                 operator["all_stats"].append({
                     "elite_stage": r[0],
-                    "min_level": 1,        # 明日方舟各階段皆從 1 級開始
+                    "min_level": 1,        
                     "max_level": r[1],
                     "hp_range": {"min": r[2], "max": r[3]},
                     "atk_range": {"min": r[4], "max": r[5]},
                     "def_range": {"min": r[6], "max": r[7]},
-                    "res_range": {"min": r[8], "max": r[9]}
+                    "res_range": {"min": r[8], "max": r[9]},
+                    "cost": r[10],         # 部署費用
+                    "block": r[11],        # 阻擋數
+                    "redeploy": r[12],     # 再部署時間
+                    "atk_spd": r[13]       # 攻擊間隔
                 })
             
-            # 預設預覽最高階段的上限資料
+            # 貼心設計：準備一組「該幹員目前最高練度」的預設數值給前端直接顯示
             operator["stats"] = {
                 "elite": stats_rows[-1][0] if stats_rows else 0,
                 "level": stats_rows[-1][1] if stats_rows else 1,
                 "hp": stats_rows[-1][3] if stats_rows else 0,
                 "atk": stats_rows[-1][5] if stats_rows else 0,
                 "def": stats_rows[-1][7] if stats_rows else 0,
-                "res": stats_rows[-1][9] if stats_rows else 0
+                "res": stats_rows[-1][9] if stats_rows else 0,
+                "cost": stats_rows[-1][10] if stats_rows else 0,
+                "block": stats_rows[-1][11] if stats_rows else 0,
+                "redeploy": stats_rows[-1][12] if stats_rows else 0,
+                "atk_spd": stats_rows[-1][13] if stats_rows else 0
             } if stats_rows else None
 
-            # 3. 4. 5. 6. 標籤、檔案、技能、模組 (保持原本加了 icon_url 的程式碼不變)
+            # ==========================================
+            # 3. 標籤 (Tags)
+            # ==========================================
             cursor.execute("SELECT tag_name FROM op_tag WHERE operator_id = %s", [op_id])
             operator["tags"] = [row[0] for row in cursor.fetchall()]
 
+            # ==========================================
+            # 4. 檔案資料 (Profile 背景故事與聲優)
+            # ==========================================
             sql_profile = "SELECT illustrator, voice_actor, lore_text FROM operator_profile WHERE operator_id = %s"
             cursor.execute(sql_profile, [op_id])
             p_row = cursor.fetchone()
-            operator["profile"] = {"illustrator": p_row[0], "voice_actor": p_row[1], "lore": p_row[2]} if p_row else None
+            if p_row:
+                operator["profile"] = {
+                    "illustrator": p_row[0],
+                    "voice_actor": p_row[1],
+                    "lore": p_row[2]
+                }
+            else:
+                operator["profile"] = None
 
-            cursor.execute("SELECT skill_id, skill_name, skill_profile, icon_url FROM skill WHERE op_id = %s", [op_id])
-            operator["skills"] = [{"id": row[0], "name": row[1], "description": row[2], "icon_url": row[3]} for row in cursor.fetchall()]
+            # ==========================================
+            # 5. 技能 (Skills) - 包含圖片 URL
+            # ==========================================
+            sql_skill = "SELECT skill_id, skill_name, skill_profile, icon_url FROM skill WHERE op_id = %s"
+            cursor.execute(sql_skill, [op_id])
+            operator["skills"] = [
+                {"id": row[0], "name": row[1], "description": row[2], "icon_url": row[3]} 
+                for row in cursor.fetchall()
+            ]
 
-            cursor.execute("SELECT module_id, module_type, unlock_mission, icon_url FROM module WHERE operator_id = %s", [op_id])
-            operator["modules"] = [{"id": row[0], "type": row[1], "mission": row[2], "icon_url": row[3]} for row in cursor.fetchall()]
+            # ==========================================
+            # 6. 模組 (Modules) - 包含圖片 URL
+            # ==========================================
+            sql_module = "SELECT module_id, module_type, unlock_mission, icon_url FROM module WHERE operator_id = %s"
+            cursor.execute(sql_module, [op_id])
+            operator["modules"] = [
+                {"id": row[0], "type": row[1], "mission": row[2], "icon_url": row[3]} 
+                for row in cursor.fetchall()
+            ]
 
+            # 最終組裝回傳
             return JsonResponse({"status": "success", "data": operator}, json_dumps_params={'ensure_ascii': False})
             
     except DatabaseError as e:
+        # 在後台印出真實錯誤，前台回傳 500 保護系統
         print(f"[DB Error in get_operator_detail]: {e}")
-        return JsonResponse({"status": "error", "message": "資料庫讀取失敗"}, status=500)
+        return JsonResponse({"status": "error", "message": "資料庫讀取失敗，請聯絡系統管理員"}, status=500)
     
-# 21.【Compute 計算】動態等級數值預測：根據指定的精階與玩家拉動的等級，進行精準線性插值
+# 21.【Compute 計算】動態等級數值預測：線性插值計算機
 def get_interp_stats(request, op_id):
     try:
         target_elite = int(request.GET.get('elite', 0))
         target_level = int(request.GET.get('level', 1))
 
         with connection.cursor() as cursor:
-            # 直接一筆撈出該精階的完整上下限範圍
+            # 撈出範圍與固定數值
             sql = """
-                SELECT max_level, min_hp, max_hp, min_atk, max_atk, min_def, max_def, min_res, max_res
+                SELECT max_level, min_hp, max_hp, min_atk, max_atk, min_def, max_def, min_res, max_res,
+                       cost, stop_amount, deploy_cd, atk_cd
                 FROM op_state
                 WHERE operator_id = %s AND elite_stage = %s
             """
@@ -822,22 +877,22 @@ def get_interp_stats(request, op_id):
             if not row:
                 return JsonResponse({"status": "error", "message": "找不到該精階的基礎數值紀錄"}, status=404)
 
-            # 解包資料庫欄位
-            max_lvl = r_max_lvl = row[0]
-            min_lvl = 1 # 預設最低等級皆為 1 級
-            
+            max_lvl = row[0]
+            min_lvl = 1 
             min_hp, max_hp = row[1], row[2]
             min_atk, max_atk = row[3], row[4]
             min_def, max_def = row[5], row[6]
             min_res, max_res = row[7], row[8]
+            
+            # 取得該精階的固定數值 (不需要插值)
+            static_cost, static_block, static_redeploy, static_atk_spd = row[9], row[10], row[11], row[12]
 
-            # 防禦機制：如果玩家輸入的等級超出範圍，自動截斷
+            # 線性插值計算
             if target_level <= min_lvl:
                 res_hp, res_atk, res_def, res_res = min_hp, min_atk, min_def, min_res
             elif target_level >= max_lvl:
                 res_hp, res_atk, res_def, res_res = max_hp, max_atk, max_def, max_res
             else:
-                # 執行線性插值公式
                 ratio = (target_level - min_lvl) / (max_lvl - min_lvl)
                 res_hp = round(min_hp + ratio * (max_hp - min_hp))
                 res_atk = round(min_atk + ratio * (max_atk - min_atk))
@@ -853,7 +908,11 @@ def get_interp_stats(request, op_id):
                     "hp": res_hp,
                     "atk": res_atk,
                     "def": res_def,
-                    "res": res_res
+                    "res": res_res,
+                    "cost": static_cost,         # 👈 直接原封不動吐給前端
+                    "block": static_block,       # 👈 直接原封不動吐給前端
+                    "redeploy": static_redeploy, # 👈 直接原封不動吐給前端
+                    "atk_spd": static_atk_spd    # 👈 直接原封不動吐給前端
                 }
             }, json_dumps_params={'ensure_ascii': False})
 
