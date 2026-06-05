@@ -109,6 +109,7 @@ DROP TABLE IF EXISTS `material`;
 CREATE TABLE `material` (
   `material_id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
+  `icon_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`material_id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -120,7 +121,7 @@ CREATE TABLE `material` (
 
 LOCK TABLES `material` WRITE;
 /*!40000 ALTER TABLE `material` DISABLE KEYS */;
-INSERT INTO `material` VALUES (1,'D32鋼'),(34,'RMA70-12'),(17,'RMA70-24'),(15,'三水錳礦'),(16,'五水研磨石'),(49,'代糖'),(30,'全新裝置'),(35,'凝膠'),(22,'切削原液'),(39,'化合切削液'),(38,'半自然溶劑'),(23,'固化纖維板'),(42,'固源岩'),(25,'固源岩組'),(31,'扭轉醇'),(54,'技巧概要·卷1'),(55,'技巧概要·卷2'),(56,'技巧概要·卷3'),(8,'提純源岩'),(13,'改量裝置'),(7,'晶耀磁環'),(37,'晶體元件'),(4,'晶體電子單元'),(20,'晶體電路'),(48,'源岩'),(36,'熾合金'),(19,'熾合金塊'),(5,'燒結核凝晶'),(24,'環己沙酮'),(45,'異鐵'),(11,'異鐵塊'),(51,'異鐵碎片'),(28,'異鐵組'),(14,'白馬醇'),(33,'研磨石'),(53,'破損裝置'),(21,'精煉溶劑'),(43,'糖'),(26,'糖組'),(9,'糖聚塊'),(18,'聚合凝膠'),(2,'聚合劑'),(44,'聚酸酯'),(10,'聚酸酯塊'),(27,'聚酸酯組'),(47,'裝置'),(40,'褐素纖維'),(32,'輕錳礦'),(41,'轉質鹽組'),(6,'轉質鹽聚塊'),(46,'酮凝集'),(29,'酮凝集組'),(12,'酮陣列'),(50,'酯原料'),(3,'雙極納米片'),(52,'雙酮');
+INSERT INTO `material` VALUES (1,'D32鋼','/static/images/materials/d32_steel.png'),(2,'聚合劑','/static/images/materials/polymerization_preparation.png'),(3,'雙極納米片',NULL),(4,'晶體電子單元',NULL),(5,'燒結核凝晶',NULL),(6,'轉質鹽聚塊',NULL),(7,'晶耀磁環',NULL),(8,'提純源岩',NULL),(9,'糖聚塊','/static/images/materials/sugar_lump.png'),(10,'聚酸酯塊',NULL),(11,'異鐵塊',NULL),(12,'酮陣列',NULL),(13,'改量裝置','/static/images/materials/optimized_device.png'),(14,'白馬醇','/static/images/materials/white_horse_kohl.png'),(15,'三水錳礦','/static/images/materials/rma70_24.png'),(16,'五水研磨石',NULL),(17,'RMA70-24',NULL),(18,'聚合凝膠','/static/images/materials/polymerized_gel.png'),(19,'熾合金塊',NULL),(20,'晶體電路',NULL),(21,'精煉溶劑',NULL),(22,'切削原液',NULL),(23,'固化纖維板',NULL),(24,'環己沙酮',NULL),(25,'固源岩組','/static/images/materials/orirock_cube.png'),(26,'糖組','/static/images/materials/sugar_pack.png'),(27,'聚酸酯組','/static/images/materials/polyester_pack.png'),(28,'異鐵組',NULL),(29,'酮凝集組',NULL),(30,'全新裝置',NULL),(31,'扭轉醇','/static/images/materials/loxic_kohl.png'),(32,'輕錳礦',NULL),(33,'研磨石',NULL),(34,'RMA70-12',NULL),(35,'凝膠',NULL),(36,'熾合金',NULL),(37,'晶體元件',NULL),(38,'半自然溶劑',NULL),(39,'化合切削液',NULL),(40,'褐素纖維',NULL),(41,'轉質鹽組',NULL),(42,'固源岩','/static/images/materials/orirock.png'),(43,'糖','/static/images/materials/sugar.png'),(44,'聚酸酯','/static/images/materials/polyester.png'),(45,'異鐵','/static/images/materials/oriron.png'),(46,'酮凝集','/static/images/materials/polyketon.png'),(47,'裝置','/static/images/materials/device.png'),(48,'源岩',NULL),(49,'代糖',NULL),(50,'酯原料',NULL),(51,'異鐵碎片',NULL),(52,'雙酮',NULL),(53,'破損裝置',NULL),(54,'技巧概要·卷1',NULL),(55,'技巧概要·卷2',NULL),(56,'技巧概要·卷3',NULL);
 /*!40000 ALTER TABLE `material` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -133,9 +134,11 @@ DROP TABLE IF EXISTS `module`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `module` (
   `module_id` int NOT NULL AUTO_INCREMENT COMMENT '模組唯一識別碼',
+  `name` varchar(100) NOT NULL,
   `operator_id` int NOT NULL COMMENT 'FK 參考 Operator',
   `unlock_mission` text COMMENT '解鎖任務條件',
   `module_type` char(1) NOT NULL COMMENT '標示 X/Y/D 模組',
+  `icon_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`module_id`),
   UNIQUE KEY `operator_id` (`operator_id`,`module_type`),
   CONSTRAINT `module_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE
@@ -148,7 +151,7 @@ CREATE TABLE `module` (
 
 LOCK TABLES `module` WRITE;
 /*!40000 ALTER TABLE `module` DISABLE KEYS */;
-INSERT INTO `module` VALUES (10,1,'戰鬥中累計造成 500,000 點物理傷害','X'),(40,4,'戰鬥中累計使用真銀斬造成 100,000 點傷害','X'),(110,11,'單次戰鬥中承受超過 10,000 點傷害','Y'),(170,17,'戰鬥中累計造成 600,000 點法術傷害','X'),(270,27,'戰鬥中累計觸發 5 次天賦回血效果','X'),(290,29,'在單次戰鬥中擊敗 10 個敵人','Y');
+INSERT INTO `module` VALUES (1,'喀蘭之威',4,'戰鬥中累積使用真銀斬造成 50000 點傷害。','X','/static/images/modules/silverash_x.png'),(2,'天使的餽贈',1,'在主線 2-8 中，使用能天使擊敗至少 10 個敵人。','X','/static/images/modules/exusiai_x.png'),(3,'火山學者的行囊',17,'在主線 4-8 中，使用艾雅法拉累計造成 20000 點法術傷害。','Y','/static/images/modules/eyjafjalla_y.png'),(4,'史爾特爾的記憶碎片',29,'戰鬥中累計使用黃昏擊敗 20 個菁英敵人。','X','/static/images/modules/surtr_x.png'),(5,'伊比利亞的劍術手稿',27,'在主線 6-5 中，使用棘刺累計發動 10 次至高之術。','X','/static/images/modules/thorns_x.png'),(6,'羅德島制式鏈鋸改裝件',11,'在主線 5-10 中，使用煌承受累計 10000 點傷害並存活。','X','/static/images/modules/blaze_x.png');
 /*!40000 ALTER TABLE `module` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,9 +164,10 @@ DROP TABLE IF EXISTS `module_material`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `module_material` (
   `module_id` int NOT NULL COMMENT 'FK 參考 Module',
+  `level` int NOT NULL,
   `material_id` int NOT NULL COMMENT 'FK 參考 Material',
   `amount` int NOT NULL COMMENT '需求素材數量',
-  PRIMARY KEY (`module_id`,`material_id`),
+  PRIMARY KEY (`module_id`,`level`,`material_id`),
   KEY `material_id` (`material_id`),
   CONSTRAINT `module_material_ibfk_1` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`) ON DELETE CASCADE,
   CONSTRAINT `module_material_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE,
@@ -177,7 +181,7 @@ CREATE TABLE `module_material` (
 
 LOCK TABLES `module_material` WRITE;
 /*!40000 ALTER TABLE `module_material` DISABLE KEYS */;
-INSERT INTO `module_material` VALUES (10,4,2),(10,17,3),(40,4,2),(40,15,3),(110,3,2),(110,24,3),(170,1,2),(170,17,4),(270,4,2),(270,16,3),(290,3,2),(290,21,4);
+INSERT INTO `module_material` VALUES (1,1,2,2),(1,2,3,3),(1,3,1,20),(1,3,2,4),(2,1,3,2),(2,2,2,3),(2,3,1,20),(2,3,3,4),(3,1,2,2),(3,2,3,3),(3,3,1,20),(3,3,2,4),(4,1,3,2),(4,2,2,3),(4,3,1,20),(4,3,3,4),(5,1,2,2),(5,2,3,3),(5,3,1,20),(5,3,2,4),(6,1,3,2),(6,2,2,3),(6,3,1,20),(6,3,3,4);
 /*!40000 ALTER TABLE `module_material` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -220,29 +224,19 @@ DROP TABLE IF EXISTS `op_state`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `op_state` (
-  `operator_id` int NOT NULL COMMENT 'FK 參考 Operator',
-  `elite` int NOT NULL COMMENT '菁英化階段',
-  `level` int NOT NULL COMMENT '該階段等級',
-  `hp` int NOT NULL COMMENT '生命值',
-  `atk` int NOT NULL COMMENT '攻擊力',
-  `def` int NOT NULL COMMENT '防禦力',
-  `res` int NOT NULL COMMENT '法術抗性',
-  `cost` int NOT NULL COMMENT '部署費用',
-  `stop_amount` int NOT NULL COMMENT '阻擋數',
-  `deploy_cd` int NOT NULL COMMENT '再部署時間',
-  `atk_cd` decimal(4,2) NOT NULL COMMENT '攻擊間隔時間',
-  PRIMARY KEY (`operator_id`,`elite`,`level`),
-  CONSTRAINT `op_state_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE,
-  CONSTRAINT `op_state_chk_1` CHECK ((`elite` in (0,1,2))),
-  CONSTRAINT `op_state_chk_10` CHECK ((`atk_cd` > 0)),
-  CONSTRAINT `op_state_chk_2` CHECK ((`level` between 1 and 90)),
-  CONSTRAINT `op_state_chk_3` CHECK ((`hp` > 0)),
-  CONSTRAINT `op_state_chk_4` CHECK ((`atk` >= 0)),
-  CONSTRAINT `op_state_chk_5` CHECK ((`def` >= 0)),
-  CONSTRAINT `op_state_chk_6` CHECK ((`res` >= 0)),
-  CONSTRAINT `op_state_chk_7` CHECK ((`cost` >= 0)),
-  CONSTRAINT `op_state_chk_8` CHECK ((`stop_amount` >= 0)),
-  CONSTRAINT `op_state_chk_9` CHECK ((`deploy_cd` > 0))
+  `operator_id` int NOT NULL,
+  `elite_stage` int NOT NULL COMMENT '精英化階段 (0, 1, 2)',
+  `max_level` int NOT NULL COMMENT '該階段的等級上限',
+  `min_hp` int NOT NULL,
+  `max_hp` int NOT NULL,
+  `min_atk` int NOT NULL,
+  `max_atk` int NOT NULL,
+  `min_def` int NOT NULL,
+  `max_def` int NOT NULL,
+  `min_res` int NOT NULL,
+  `max_res` int NOT NULL,
+  PRIMARY KEY (`operator_id`,`elite_stage`),
+  CONSTRAINT `op_state_ibfk_1` FOREIGN KEY (`operator_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -252,7 +246,7 @@ CREATE TABLE `op_state` (
 
 LOCK TABLES `op_state` WRITE;
 /*!40000 ALTER TABLE `op_state` DISABLE KEYS */;
-INSERT INTO `op_state` VALUES (1,2,90,1673,540,161,0,14,1,70,0.78),(4,2,90,2560,713,387,10,18,2,70,1.30),(11,2,90,2821,825,414,0,24,3,70,1.20),(17,2,90,1743,645,122,20,21,1,70,1.60),(27,2,90,2612,711,402,10,20,2,70,1.25);
+INSERT INTO `op_state` VALUES (1,0,50,735,1051,217,345,57,85,0,0),(1,1,80,1051,1383,345,480,85,126,0,0),(1,2,90,1483,1670,480,540,126,161,0,0),(4,0,50,1043,1491,333,476,174,249,10,10),(4,1,80,1491,1937,476,644,249,333,10,10),(4,2,90,2039,2560,670,763,355,397,10,10),(11,0,50,1222,1675,279,405,137,194,0,0),(11,1,80,1675,2205,405,588,194,270,0,0),(11,2,90,2205,2827,588,765,270,351,0,0),(17,0,50,748,1039,311,445,46,64,10,10),(17,1,80,1039,1350,445,610,64,92,15,15),(17,2,90,1450,1743,610,735,92,122,20,20),(27,0,50,1060,1453,306,438,175,251,10,10),(27,1,80,1453,1888,438,593,251,335,10,10),(27,2,90,1988,2612,593,711,335,402,10,10),(29,0,50,1195,1637,289,414,158,226,15,15),(29,1,80,1637,2213,414,576,226,323,15,15),(29,2,90,2313,2916,576,711,323,414,15,15);
 /*!40000 ALTER TABLE `op_state` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -412,6 +406,7 @@ CREATE TABLE `skill` (
   `op_id` int NOT NULL,
   `skill_name` varchar(50) NOT NULL,
   `skill_profile` text,
+  `icon_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`skill_id`),
   KEY `op_id` (`op_id`),
   CONSTRAINT `skill_ibfk_1` FOREIGN KEY (`op_id`) REFERENCES `operator` (`operator_id`) ON DELETE CASCADE
@@ -424,7 +419,7 @@ CREATE TABLE `skill` (
 
 LOCK TABLES `skill` WRITE;
 /*!40000 ALTER TABLE `skill` DISABLE KEYS */;
-INSERT INTO `skill` VALUES (1,4,'真銀斬','大幅度擴大攻擊範圍，攻擊力提升，同時攻擊多個目標。'),(2,17,'火山','隨機攻擊範圍內多個目標，攻擊力與攻速大幅提升。'),(3,29,'黃昏','立即恢復所有生命值，攻擊範圍、攻擊力與攻擊目標數大幅提升，隨後每秒流失生命。'),(4,1,'過載模式','攻擊變為 5 連射，攻擊間隔縮短，自動觸發。'),(5,27,'至高之術','攻擊範圍擴大，攻擊力與攻擊速度提升，第二次使用後持續時間無限'),(6,11,'鏈鋸延伸模組','攻擊力與防禦力提升，攻擊距離加長，持續時間無限');
+INSERT INTO `skill` VALUES (1,4,'真銀斬','大幅度擴大攻擊範圍，攻擊力提升，同時攻擊多個目標。','/static/images/skills/silverash_s3.png'),(2,17,'火山','隨機攻擊範圍內多個目標，攻擊力與攻速大幅提升。','/static/images/skills/eyjafjalla_s3.png'),(3,29,'黃昏','立即恢復所有生命值，攻擊範圍、攻擊力與攻擊目標數大幅提升，隨後每秒流失生命。','/static/images/skills/surtr_s3.png'),(4,1,'過載模式','攻擊變為 5 連射，攻擊間隔縮短，自動觸發。','/static/images/skills/exusiai_s3.png'),(5,27,'至高之術','攻擊範圍擴大，攻擊力與攻擊速度提升，第二次使用後持續時間無限','/static/images/skills/thorns_s3.png'),(6,11,'鏈鋸延伸模組','攻擊力與防禦力提升，攻擊距離加長，持續時間無限','/static/images/skills/blaze_s2.png');
 /*!40000 ALTER TABLE `skill` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -437,9 +432,10 @@ DROP TABLE IF EXISTS `skill_material`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `skill_material` (
   `skill_id` int NOT NULL,
+  `level` int NOT NULL,
   `material_id` int NOT NULL,
   `amount` int NOT NULL,
-  PRIMARY KEY (`skill_id`,`material_id`),
+  PRIMARY KEY (`skill_id`,`level`,`material_id`),
   KEY `material_id` (`material_id`),
   CONSTRAINT `skill_material_ibfk_1` FOREIGN KEY (`skill_id`) REFERENCES `skill` (`skill_id`) ON DELETE CASCADE,
   CONSTRAINT `skill_material_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE CASCADE
@@ -452,7 +448,7 @@ CREATE TABLE `skill_material` (
 
 LOCK TABLES `skill_material` WRITE;
 /*!40000 ALTER TABLE `skill_material` DISABLE KEYS */;
-INSERT INTO `skill_material` VALUES (1,1,4),(1,14,6),(1,56,15),(2,2,4),(2,9,5),(2,56,15),(3,3,4),(3,18,9),(3,56,15),(4,1,4),(4,10,5),(4,56,15),(5,11,4),(5,21,6),(5,56,15),(6,2,4),(6,14,6),(6,56,15);
+INSERT INTO `skill_material` VALUES (1,8,2,4),(1,9,1,10),(1,9,3,5),(1,10,2,6),(2,8,2,3),(2,9,1,10),(2,9,3,4),(2,10,2,6),(2,10,3,5),(3,8,3,4),(3,9,1,9),(3,9,2,4),(3,10,2,6),(3,10,3,4),(4,8,2,4),(4,8,3,4),(4,9,1,8),(4,9,2,4),(4,9,3,5),(4,10,2,6),(5,8,2,3),(5,9,1,12),(5,9,3,5),(5,10,2,6),(5,10,3,5),(6,8,3,4),(6,9,1,8),(6,9,2,4),(6,10,2,6),(6,10,3,4);
 /*!40000 ALTER TABLE `skill_material` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -544,4 +540,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-03 12:22:24
+-- Dump completed on 2026-06-05 21:49:49
