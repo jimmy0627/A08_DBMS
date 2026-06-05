@@ -55,7 +55,7 @@ async function loadProfileData(userId) {
                     unit.innerHTML = `
                         <div class="unit-thumb" style="background-color: #333">
                             <span>${item.name[0]}</span>
-                            <button class="unit-delete" onclick="deleteFromRoster(${item.operator_id}, '${item.name}')" title="註銷檔案">×</button>
+                            <button class="unit-delete" onclick="deleteFromRoster('${item.operator_id}', '${item.name}')" title="註銷檔案">×</button>
                         </div>
                         <div class="unit-level">E${item.current_elite} ${item.current_level}</div>
                     `;

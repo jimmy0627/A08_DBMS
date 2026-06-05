@@ -33,44 +33,21 @@
           </div>
         </section>
 
-        <section class="event-section panel">
-          <div class="event-card">
-            <div class="event-meta">
-              <span class="count">21</span>
-              <p>活動倒數 / DAYS</p>
-              <span class="status-badge">CURRENT EVENT</span>
-            </div>
-            <div class="event-content">
-              <h2>惡兆湍流</h2>
-              <p class="event-desc">危機合約：起源行動 // 點擊查看總覽</p>
-            </div>
+        <section class="event-section panel" id="event-section">
+          <div class="loading-state" style="padding: 40px; text-align: center; color: var(--muted); font-size: 0.8rem; font-weight: 800;">
+            [ ACCESSING_EVENT_DATA ]
           </div>
         </section>
       </div>
 
       <!-- Middle Row -->
-      <div class="dashboard-middle">
-        <div class="guide-grid">
-          <article class="guide-card panel">
-            <div class="card-header">編隊 // GUIDE</div>
-            <h3>主線 H14-4 突襲</h3>
-            <p>低配平民作業</p>
-            <span class="arrow">›</span>
-          </article>
-          <article class="guide-card panel">
-            <div class="card-header">幹員 // GUIDE</div>
-            <h3>瑪恩納專精推薦</h3>
-            <p>模組升級指南</p>
-          </article>
+      <div class="dashboard-middle" id="guide-dashboard">
+        <div class="guide-grid" id="guide-grid">
+           <!-- Dynamically loaded -->
         </div>
 
-        <article class="wide-guide panel">
-          <div class="guide-info">
-            <p class="card-header">活動解析 // LATEST GUIDE</p>
-            <h3>生息演算：沙洲遺聞</h3>
-            <p>開局黃金 3 天運營思路</p>
-          </div>
-          <button class="btn-read-more">READ MORE</button>
+        <article class="wide-guide panel" id="featured-guide">
+           <!-- Dynamically loaded -->
         </article>
       </div>
 
@@ -84,22 +61,8 @@
               <a href="/operators.html" class="view-all-link">查看全部 // VIEW ALL ›</a>
             </div>
           </div>
-          <div class="operators-list">
-            <div class="op-card">
-              <div class="op-thumb">A</div>
-              <div class="op-tag birthday">今日生日 // BIRTHDAY</div>
-              <p>阿米婭</p>
-            </div>
-            <div class="op-card">
-              <div class="op-thumb">M</div>
-              <div class="op-tag">近期新增 // NEWLY ADDED</div>
-              <p>瑪恩納</p>
-            </div>
-            <div class="op-card">
-              <div class="op-thumb">S</div>
-              <div class="op-tag">近期新增 // NEWLY ADDED</div>
-              <p>塑心</p>
-            </div>
+          <div class="operators-list" id="operators-list">
+             <!-- Dynamically loaded -->
           </div>
         </section>
 

@@ -14,6 +14,7 @@
     const unwrapList = (payload) => {
         if (Array.isArray(payload?.operators)) return payload.operators;
         if (Array.isArray(payload?.data)) return payload.data;
+        if (Array.isArray(payload?.results)) return payload.results;
         return Array.isArray(payload) ? payload : [];
     };
 
@@ -99,6 +100,19 @@
             elements.btnSort.innerHTML = `<span class="icon">⇅</span> ${titleText}排序`;
             applyFiltersAndSort();
         });
+        elements.listContainer?.addEventListener('click', (e) => {
+        // 尋找被點擊的元素是否為 Roster 按鈕 (包含點擊到按鈕內的 span)
+        const rosterBtn = e.target.closest('.btn-add-roster');
+        
+        if (rosterBtn) {
+            // 從按鈕的 data 屬性中安全地把 ID 與名稱拿出來
+            const opId = rosterBtn.dataset.id;
+            const opName = rosterBtn.dataset.name;
+            
+            // 呼叫加入名冊的函數
+            addToRoster(opId, opName);
+        }
+        });
     }
 
     function renderList(operators) {
@@ -110,9 +124,10 @@
         }
 
         const user = JSON.parse(localStorage.getItem('prts_user') || 'null');
+        const uid = user ? (user.user_id || user.id) : null;
 
         elements.listContainer.innerHTML = operators.map(op => {
-            const id = op.operator_id || '--';
+            const id = op.operator_id || op.id || '--';
             const name = op.name || 'UNKNOWN';
             const rarityNum = parseInt(op.rarity) || 1;
             const rarityStr = '★'.repeat(rarityNum);
@@ -124,12 +139,13 @@
                 </a>
             `;
 
-            if (user && user.user_id) {
+
+            if (uid) {
                 actionHtml = `
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         ${actionHtml}
-                        <button class="btn-add-roster" onclick="addToRoster(${id}, '${name}')">
-                            <span class="plus">+</span> Roster
+                        <button class="btn-add-roster" data-id="${id}" data-name="${name}">
+                            <span class="plus">+</span> ROSTER
                         </button>
                     </div>
                 `;
@@ -171,33 +187,45 @@
     }
 
     async function addToRoster(opId, opName) {
+        console.log(`[PRTS] Requesting roster registration for: ${opName} (${opId})`);
+        
         const user = JSON.parse(localStorage.getItem('prts_user') || 'null');
-        if (!user || !user.user_id) {
-            alert('請先登入以使用此功能');
+        if (!user || (!user.user_id && !user.id)) {
+            alert('UNAUTHORIZED // 請先登入系統');
             return;
         }
 
+        const uid = parseInt(user.user_id || user.id);
+
         try {
-            const response = await fetch('/api/operators/roster/add/', {
+            const requestData = {
+                user_id: uid,
+                operator_id: opId
+            };
+            console.log(`[PRTS] Sending data:`, requestData);
+
+            const response = await fetch(`${API_BASE}/operators/roster/add/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.user_id,
-                    operator_id: opId
-                })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
             });
+
             const result = await response.json();
-            if (result.status === 'success') {
+            if (result.status === 'success' || response.ok) {
                 alert(`[羅德島人事部] 已將幹員「${opName}」的人事檔案併入庫中。`);
             } else {
-                alert(result.message || '操作失敗');
+                alert(result.message || '操作失敗：該檔案可能已在名冊中或權限不足');
             }
         } catch (error) {
-            console.error('Add to roster error:', error);
-            alert('通訊中斷，請稍後再試');
+            console.error('[PRTS] Add to roster error:', error);
+            alert('COMMUNICATION ERROR // 通訊中斷，請稍後再試');
         }
     }
 
+    // Immediately expose to window ensure accessibility for DOM events
     window.addToRoster = addToRoster;
 
     async function init() {

@@ -5,17 +5,18 @@
     const API_BASE = '/api';
 
     const elements = {
-      // 基礎數據 (從 API 抓取並填入對應位置)
+      // 儀表板
       operatorCount: document.querySelector('.event-meta .count'),
       briefing: document.querySelector('.briefing-box p'),
+      eventSection: document.querySelector('#event-section'),
       
       // 搜尋系統
       searchInput: document.querySelector('.header-search input'),
       
       // 內容列表
-      guideGrid: document.querySelector('.guide-grid'),
-      wideGuide: document.querySelector('.wide-guide'),
-      operatorsList: document.querySelector('.operators-list'),
+      guideGrid: document.querySelector('#guide-grid'),
+      featuredGuide: document.querySelector('#featured-guide'),
+      operatorsList: document.querySelector('#operators-list'),
     };
 
     // --- 工具函數 ---
@@ -46,7 +47,7 @@
 
     async function loadHomepageData() {
       try {
-        // 1. 獲取幹員與關卡基礎資料
+        // 1. 獲取核心資料
         const [operatorsPayload, stagesPayload] = await Promise.all([
           fetchApi('/operators/list/'),
           fetchApi('/stages/')
@@ -55,19 +56,36 @@
         const operators = unwrapList(operatorsPayload);
         const stages = unwrapList(stagesPayload);
 
-        // 2. 更新儀表板數據
-        if (elements.operatorCount) elements.operatorCount.textContent = operators.length;
+        // 2. 更新簡報
         if (elements.briefing) {
             elements.briefing.innerHTML = `正在連線至羅德島數據庫...<br>當前已載入 ${operators.length} 名幹員檔案與 ${stages.length} 個作戰區域數據。`;
         }
 
-        // 3. 渲染最新幹員 (取前 3 個以符合網格)
+        // 3. 渲染「活動/重點作戰」看板 (取最後一個關卡作為當前活動)
+        if (elements.eventSection && stages.length > 0) {
+            const currentStage = stages[stages.length - 1];
+            elements.eventSection.innerHTML = `
+                <div class="event-card" onclick="location.href='/operators?search=${currentStage.stage_id}'" style="cursor:pointer">
+                  <div class="event-meta">
+                    <span class="count">${operators.length}</span>
+                    <p>已載入幹員 / OPS</p>
+                    <span class="status-badge" style="background:var(--teal); color:#000;">FEATURED STAGE</span>
+                  </div>
+                  <div class="event-content">
+                    <h2>${currentStage.stage_id} // 戰術目標</h2>
+                    <p class="event-desc">${currentStage.description || '點擊查看推薦幹員與掉落數據'}</p>
+                  </div>
+                </div>
+            `;
+        }
+
+        // 4. 渲染「最新幹員」 (取前 3 個)
         if (elements.operatorsList) {
             elements.operatorsList.innerHTML = operators.slice(0, 3).map(op => `
                 <div class="op-card" onclick="location.href='/operator/${op.operator_id}'" style="cursor:pointer">
-                  <div class="op-thumb">
-                    ${op.name[0]}
-                    <div style="position:absolute; bottom:0; width:100%; height:4px; background:var(--teal); opacity:0.3"></div>
+                  <div class="op-thumb" style="background-image: url('${op.image_url || '/static/images/operators/default.png'}'); background-size: cover; display: flex; align-items: center; justify-content: center; background-position: top center;">
+                    ${!op.image_url ? op.name[0] : ''}
+                    <div style="position:absolute; bottom:0; width:100%; height:4px; background:var(--teal); opacity:0.8"></div>
                   </div>
                   <div class="op-tag">${op.class.toUpperCase()} // PERSONNEL</div>
                   <p>${op.name}</p>
@@ -75,8 +93,33 @@
             `).join('');
         }
 
+        // 5. 渲染「攻略推薦」 (從關卡中抽樣顯示)
+        if (elements.guideGrid) {
+            const sampleStages = stages.slice(0, 2);
+            elements.guideGrid.innerHTML = sampleStages.map(st => `
+                <article class="guide-card panel" onclick="location.href='/operators?search=${st.stage_id}'" style="cursor:pointer">
+                  <div class="card-header">關卡 // STAGE</div>
+                  <h3>${st.stage_id}</h3>
+                  <p>目標地區: ${st.map_name || '未知區域'}</p>
+                  <span class="arrow">›</span>
+                </article>
+            `).join('');
+        }
+
+        if (elements.featuredGuide) {
+            elements.featuredGuide.innerHTML = `
+                <div class="guide-info">
+                  <p class="card-header">系統公告 // SYSTEM NOTIFICATION</p>
+                  <h3>羅德島數據庫同步完成</h3>
+                  <p>當前資料庫版本: v2.0.4.5 // 伺服器狀態: 穩定</p>
+                </div>
+                <button class="btn-read-more" onclick="location.href='/operators'">READ ALL FILES</button>
+            `;
+        }
+
       } catch (error) {
         console.error('[PRTS] 首頁數據加載失敗:', error);
+        if (elements.briefing) elements.briefing.innerHTML = '<span style="color:var(--red);">系統掛載失敗: 無法存取遠端資料庫</span>';
       }
     }
 

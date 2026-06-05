@@ -77,8 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const captchaInput = document.getElementById('captcha').value;
-        if (captchaInput !== '阿米婭' && captchaInput !== 'Amiya') {
+        const captchaInput = document.getElementById('captcha').value.trim();
+        const validAnswers = ['阿米婭', 'Amiya', '阿米雅', '阿米娅'];
+        if (!validAnswers.includes(captchaInput)) {
             alert('NEURAL CHECK FAILED // 識別失敗：請輸入正確的領袖名稱');
             return;
         }
@@ -90,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = {
             email: document.getElementById('email').value,
             password: passwordInput.value,
-            nickname: codenameInput.value // Using CODENAME as nickname
+            nickname: codenameInput.value, // for display
+            username: codenameInput.value  // often used as the primary identifier in Django
         };
 
         try {

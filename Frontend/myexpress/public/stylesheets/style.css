@@ -422,6 +422,22 @@ select {
   background-position: calc(100% - 12px) center;
 }
 
+select option {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.level-control button:hover {
+  background: rgba(41, 182, 246, 0.1) !important;
+  color: #fff !important;
+}
+
 /* 關卡與事件面板 */
 .event-section {
   background: rgba(41, 182, 246, 0.02);
@@ -1296,4 +1312,30 @@ select {
 /* Auth Utilities */
 .btn-logout:hover { background: #d32f2f !important; }
 .header-actions { display: flex; align-items: center; gap: 10px; }
+.btn-add-roster {
+    background: rgba(41, 182, 246, 0.05);
+    color: var(--teal);
+    border: 1px solid var(--teal);
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+}
 
+.btn-add-roster:hover {
+    background: var(--teal);
+    color: #000;
+    box-shadow: 0 0 10px rgba(41, 182, 246, 0.3);
+}
+
+.btn-add-roster .plus {
+    font-size: 1rem;
+    font-weight: bold;
+}

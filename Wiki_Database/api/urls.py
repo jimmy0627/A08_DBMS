@@ -34,6 +34,8 @@ urlpatterns = [
     path('operators/list/', views.get_operator_list),
     # 獲取素材圖鑑清單
     path('materials/list/', views.get_materials_list),
+    # 獲取素材消耗詳情
+    path('materials/<int:material_id>/usage/', views.get_material_usage_detail),
     
     # 獲取特定玩家的持有小隊練度
     path('users/<int:user_id>/roster/', views.get_user_roster),

@@ -707,6 +707,58 @@ def get_materials_list(request):
         print(f"[Materials List Error]: {e}")
         return JsonResponse({"status": "error", "message": "素材資料讀取失敗"}, status=500)
 
+# 21.【Read 查詢】獲取特定素材的詳細消耗報告 (哪些幹員需要、在哪個階段、需要多少)
+def get_material_usage_detail(request, material_id):
+    try:
+        with connection.cursor() as cursor:
+            # 1. 查詢精英化需求
+            sql_elite = """
+                SELECT o.name, om.elite_stage, om.amount
+                FROM op_material om
+                JOIN operator o ON om.operator_id = o.operator_id
+                WHERE om.material_id = %s
+                ORDER BY om.elite_stage DESC
+            """
+            cursor.execute(sql_elite, [material_id])
+            elite_reqs = [{"name": r[0], "type": f"精英化階段 {r[1]}", "amount": r[2]} for r in cursor.fetchall()]
+
+            # 2. 查詢技能升級需求
+            sql_skill = """
+                SELECT o.name, s.skill_name, sm.level, sm.amount
+                FROM skill_material sm
+                JOIN skill s ON sm.skill_id = s.skill_id
+                JOIN operator o ON s.op_id = o.operator_id
+                WHERE sm.material_id = %s
+                ORDER BY sm.level DESC
+            """
+            cursor.execute(sql_skill, [material_id])
+            skill_reqs = [{"name": r[0], "type": f"技能 [{r[1]}] LV.{r[2]}", "amount": r[3]} for r in cursor.fetchall()]
+
+            # 3. 查詢模組需求
+            sql_module = """
+                SELECT o.name, m.name as module_name, mm.level, mm.amount
+                FROM module_material mm
+                JOIN module m ON mm.module_id = m.module_id
+                JOIN operator o ON m.operator_id = o.operator_id
+                WHERE mm.material_id = %s
+                ORDER BY mm.level DESC
+            """
+            cursor.execute(sql_module, [material_id])
+            module_reqs = [{"name": r[0], "type": f"模組 [{r[1]}] 等級 {r[2]}", "amount": r[3]} for r in cursor.fetchall()]
+
+            return JsonResponse({
+                "status": "success",
+                "material_id": material_id,
+                "usage": {
+                    "elite": elite_reqs,
+                    "skill": skill_reqs,
+                    "module": module_reqs
+                }
+            }, json_dumps_params={'ensure_ascii': False})
+
+    except DatabaseError as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 # 17.【Delete 刪除】刪除特定攻略留言 (對應 DELETE 請求)
 @csrf_exempt
 def delete_guide_comment(request, guide_id):
