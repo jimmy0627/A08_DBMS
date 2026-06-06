@@ -1,6 +1,4 @@
-from ast import operator
-
-from django.db import connection, DatabaseError
+﻿from django.db import connection, DatabaseError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -77,9 +75,6 @@ def get_guides_by_stage(request, stage_id):
     except DatabaseError as e:
         # 在後台黑視窗印出真正錯誤原因，方便小組內部除錯
         print(f"[DB Error in get_guides_by_stage]: {e}")
-        return JsonResponse({"status": "error", "message": "無法取得攻略"}, status=500)
-            
-    except DatabaseError as e:
         return JsonResponse({"status": "error", "message": "無法取得攻略"}, status=500)
     
 # 4. 【Create 新增】新增攻略 (對應 POST 請求)
@@ -448,41 +443,98 @@ def create_stage(request):
             print(f"[Create Stage Error]: {e}")
             return JsonResponse({"status": "error", "message": "關卡建立失敗，資料庫寫入異常"}, status=500)
 
+# 22.【Read 查詢】獲取系統全局數據統計
+def get_global_stats(request):
+    try:
+        with connection.cursor() as cursor:
+            # 統計幹員總數
+            cursor.execute("SELECT COUNT(*) FROM operator")
+            op_count = cursor.fetchone()[0]
+            
+            # 統計素材總數
+            cursor.execute("SELECT COUNT(*) FROM material")
+            mat_count = cursor.fetchone()[0]
+            
+            # 統計攻略總數
+            cursor.execute("SELECT COUNT(*) FROM guides")
+            guide_count = cursor.fetchone()[0]
+            
+            return JsonResponse({
+                "status": "success",
+                "counts": {
+                    "operators": op_count,
+                    "materials": mat_count,
+                    "guides": guide_count
+                }
+            })
+    except DatabaseError as e:
+        print(f"[Stats Error]: {e}")
+        return JsonResponse({"status": "error", "message": "無法取得統計數據"}, status=500)
+
 
 def get_operator_list(request):
     try:
         with connection.cursor() as cursor:
-            # 補上 cost, stop_amount, deploy_cd, atk_cd
-            sql = """
+            # 1. 抓取所有幹員基礎資料與標籤
+            sql_ops = """
                 SELECT 
-                    o.operator_id, o.name, o.rarity, o.`class`, o.sex, o.branch, o.position,
-                    s.max_hp, s.max_atk, s.max_def, s.max_res,
-                    s.cost, s.stop_amount, s.deploy_cd, s.atk_cd
+                    o.operator_id, o.name, o.rarity, o.class, o.sex, o.branch, o.position,
+                    GROUP_CONCAT(t.tag_name) as tags
                 FROM operator o
-                LEFT JOIN op_state s ON o.operator_id = s.operator_id
-                JOIN (
-                    SELECT operator_id, MAX(elite_stage) as max_elite
-                    FROM op_state
-                    GROUP BY operator_id
-                ) m ON s.operator_id = m.operator_id AND s.elite_stage = m.max_elite
+                LEFT JOIN op_tag t ON o.operator_id = t.operator_id
+                GROUP BY o.operator_id
             """
-            cursor.execute(sql)
-            rows = cursor.fetchall()
+            cursor.execute(sql_ops)
+            op_rows = cursor.fetchall()
+
+            # 2. 抓取所有數值狀態
+            sql_states = """
+                SELECT operator_id, elite_stage, max_level, max_hp, max_atk, max_def, max_res, cost, stop_amount, deploy_cd, atk_cd
+                FROM op_state
+                ORDER BY operator_id, elite_stage
+            """
+            cursor.execute(sql_states)
+            state_rows = cursor.fetchall()
             
+            # 將狀態按 operator_id 分組
+            states_by_op = {}
+            for sr in state_rows:
+                oid = sr[0]
+                if oid not in states_by_op:
+                    states_by_op[oid] = []
+                states_by_op[oid].append({
+                    "elite_stage": sr[1],
+                    "max_level": sr[2],
+                    "hp": sr[3],
+                    "atk": sr[4],
+                    "def": sr[5],
+                    "res": sr[6],
+                    "cost": sr[7],
+                    "block": sr[8],
+                    "redeploy": sr[9],
+                    "atk_spd": sr[10]
+                })
+
             result = []
-            for r in rows:
+            for r in op_rows:
+                oid = r[0]
                 result.append({
-                    "operator_id": r[0], "name": r[1], "rarity": r[2], "class": r[3],
-                    "sex": r[4], "branch": r[5], "position": r[6],
-                    "hp": r[7], "atk": r[8], "def": r[9], "res": r[10],
-                    "cost": r[11], "block": r[12], "redeploy": r[13], "atk_spd": r[14] 
+                    "operator_id": oid, 
+                    "name": r[1], 
+                    "rarity": r[2], 
+                    "class": r[3],
+                    "sex": r[4], 
+                    "branch": r[5], 
+                    "position": r[6],
+                    "tags": r[7].split(',') if r[7] else [],
+                    "states": states_by_op.get(oid, [])
                 })
                 
             return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
             
     except DatabaseError as e:
         print(f"[DB Error in get_operator_list]: {e}")
-        return JsonResponse({"status": "error", "message": "讀取幹員清單失敗"}, status=500)
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 # 15.【Read 查詢】查詢特定玩家持有的所有幹員練度清單 (對應 GET 請求)
 def get_user_roster(request, user_id):
@@ -587,7 +639,7 @@ def get_user_guides(request, user_id):
         with connection.cursor() as cursor:
             # 這裡模擬 status，若資料庫無 status 欄位可暫時預設 'published'
             sql = """
-                SELECT stage_id, title, created_at, 'published' as status 
+                SELECT guide_id, stage_id, title, created_at, 'published' as status 
                 FROM guides 
                 WHERE user_id = %s
                 ORDER BY created_at DESC
@@ -598,10 +650,11 @@ def get_user_guides(request, user_id):
             result = []
             for r in rows:
                 result.append({
-                    "stage_id": r[0],
-                    "title": r[1],
-                    "date": str(r[2]) if r[2] else None,
-                    "status": r[3]
+                    "id": r[0],
+                    "stage_id": r[1],
+                    "title": r[2],
+                    "date": str(r[3]) if r[3] else None,
+                    "status": r[4]
                 })
                 
             return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
@@ -728,7 +781,7 @@ def get_material_usage_detail(request, material_id):
             sql_skill = """
                 SELECT o.name, s.skill_name, sm.level, sm.amount
                 FROM skill_material sm
-                JOIN skill s ON sm.skill_id = s.skill_id
+                JOIN skill s ON sm.skill_id = S.skill_id
                 JOIN operator o ON s.op_id = o.operator_id
                 WHERE sm.material_id = %s
                 ORDER BY sm.level DESC
@@ -798,7 +851,7 @@ def get_operator_detail(request, op_id):
             # ==========================================
             # 1. 基礎資料 (Operator 基本屬性)
             # ==========================================
-            sql_basic = "SELECT operator_id, name, rarity, `class`, sex, branch, position FROM operator WHERE operator_id = %s"
+            sql_basic = "SELECT operator_id, name, rarity, class, sex, branch, position FROM operator WHERE operator_id = %s"
             cursor.execute(sql_basic, [op_id])
             basic_row = cursor.fetchone()
             
@@ -892,14 +945,44 @@ def get_operator_detail(request, op_id):
             ]
 
             # ==========================================
-            # 6. 模組 (Modules) - 包含圖片 URL
+            # 6. 模組 (Modules) - 包含圖片 URL 與素材需求
             # ==========================================
             sql_module = "SELECT module_id, module_type, unlock_mission, icon_url FROM module WHERE operator_id = %s"
             cursor.execute(sql_module, [op_id])
-            operator["modules"] = [
-                {"id": row[0], "type": row[1], "mission": row[2], "icon_url": row[3]} 
-                for row in cursor.fetchall()
-            ]
+            module_rows = cursor.fetchall()
+            
+            operator["modules"] = []
+            for m_row in module_rows:
+                mid = m_row[0]
+                # 抓取該模組各等級所需素材
+                sql_m_mat = """
+                    SELECT mm.level, m.name, mm.amount, m.icon_url
+                    FROM module_material mm
+                    JOIN material m ON mm.material_id = m.material_id
+                    WHERE mm.module_id = %s
+                    ORDER BY mm.level ASC
+                """
+                cursor.execute(sql_m_mat, [mid])
+                m_mat_rows = cursor.fetchall()
+                
+                materials_by_level = {}
+                for mmr in m_mat_rows:
+                    lv = mmr[0]
+                    if lv not in materials_by_level:
+                        materials_by_level[lv] = []
+                    materials_by_level[lv].append({
+                        "name": mmr[1],
+                        "amount": mmr[2],
+                        "icon": mmr[3]
+                    })
+                
+                operator["modules"].append({
+                    "id": mid,
+                    "type": m_row[1],
+                    "mission": m_row[2],
+                    "icon_url": m_row[3],
+                    "materials": materials_by_level
+                })
 
             # 最終組裝回傳
             return JsonResponse({"status": "success", "data": operator}, json_dumps_params={'ensure_ascii': False})
@@ -971,3 +1054,241 @@ def get_interp_stats(request, op_id):
     except DatabaseError as e:
         print(f"[Interpolation Error]: {e}")
         return JsonResponse({"status": "error", "message": "數值插值計算異常"}, status=500)
+
+# 22.【Compute & Update】預估養成升級計算機
+@csrf_exempt
+def calc_upgrade_plan(request, user_id, op_id):
+    try:
+        curr_elite = int(request.GET.get('curr_elite', 0))
+        curr_level = int(request.GET.get('curr_level', 1))
+        targ_elite = int(request.GET.get('targ_elite', 2))
+        targ_level = int(request.GET.get('targ_level', 90))
+
+        DROP_RATE_MAP = {
+            '固定': 1.0,
+            '大概率': 0.6,
+            '中概率': 0.3,
+            '小概率': 0.15,
+            '罕見': 0.05
+        }
+
+        with connection.cursor() as cursor:
+            # 1. 更新玩家練度進度
+            sql_update = """
+                UPDATE own 
+                SET current_elite = %s, current_level = %s, target_elite = %s, target_level = %s 
+                WHERE user_id = %s AND operator_id = %s
+            """
+            cursor.execute(sql_update, [curr_elite, curr_level, targ_elite, targ_level, user_id, op_id])
+
+            # 2. 聚合精英化素材需求
+            # 我們搜尋區間： elite_stage > curr_elite 且 <= targ_elite
+            sql_materials = """
+                SELECT m.material_id, m.name, m.icon_url, SUM(om.amount) as total_amount
+                FROM op_material om
+                JOIN material m ON om.material_id = m.material_id
+                WHERE om.operator_id = %s AND om.elite_stage > %s AND om.elite_stage <= %s
+                GROUP BY m.material_id, m.name, m.icon_url
+            """
+            cursor.execute(sql_materials, [op_id, curr_elite, targ_elite])
+            mat_rows = cursor.fetchall()
+
+            result_materials = []
+            for m_row in mat_rows:
+                mat_id, mat_name, mat_icon, amount = m_row
+                amount = int(amount) if amount else 0
+                
+                # 3. 尋找最佳掉落關卡
+                # 邏輯：找該素材機率最高的一筆 (利用 CASE 排序機率)
+                sql_best_stage = """
+                    SELECT sd.stage_id, s.energy_cost, sd.drop_rate
+                    FROM stage_drop sd
+                    JOIN stages s ON sd.stage_id = s.stage_id
+                    WHERE sd.material_id = %s
+                    ORDER BY 
+                        CASE sd.drop_rate 
+                            WHEN '固定' THEN 5 
+                            WHEN '大概率' THEN 4 
+                            WHEN '中概率' THEN 3 
+                            WHEN '小概率' THEN 2 
+                            WHEN '罕見' THEN 1 
+                        END DESC
+                    LIMIT 1
+                """
+                cursor.execute(sql_best_stage, [mat_id])
+                stage_row = cursor.fetchone()
+
+                best_stage_info = None
+                if stage_row:
+                    s_id, s_energy, s_rate = stage_row
+                    prob = float(DROP_RATE_MAP.get(s_rate, 0.01))
+                    
+                    # 確保所有運算子類型一致，避免 Decimal vs float 錯誤
+                    expected_runs = round(float(amount) / prob, 1)
+                    expected_energy = round(expected_runs * float(s_energy))
+                    
+                    best_stage_info = {
+                        "stage_id": s_id,
+                        "energy_cost": int(s_energy),
+                        "drop_rate": s_rate,
+                        "expected_runs": float(expected_runs),
+                        "expected_energy": int(expected_energy)
+                    }
+
+                result_materials.append({
+                    "material_id": mat_id,
+                    "name": mat_name,
+                    "icon": mat_icon,
+                    "amount": amount,
+                    "best_stage": best_stage_info
+                })
+
+            return JsonResponse({
+                "status": "success",
+                "user_id": user_id,
+                "operator_id": op_id,
+                "upgrade_path": {
+                    "from": f"E{curr_elite}/LV{curr_level}",
+                    "to": f"E{targ_elite}/LV{targ_level}"
+                },
+                "total_materials": result_materials
+            }, json_dumps_params={'ensure_ascii': False})
+
+    except DatabaseError as e:
+        print(f"[Calc Upgrade Error]: {e}")
+        return JsonResponse({"status": "error", "message": "升級計畫計算失敗"}, status=500)
+    except Exception as e:
+        print(f"[General Error]: {e}")
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 23.【Read】獲取單篇攻略詳情與留言
+def get_guide_detail(request, guide_id):
+    try:
+        with connection.cursor() as cursor:
+            # 1. 獲取攻略主體資訊 (JOIN 作者與關卡)
+            sql_guide = """
+                SELECT g.guide_id, g.title, g.content, g.created_at, u.nickname, 
+                       s.stage_id, s.name as stage_name, s.energy_cost, g.user_id
+                FROM guides g
+                JOIN reg_user u ON g.user_id = u.user_id
+                JOIN stages s ON g.stage_id = s.stage_id
+                WHERE g.guide_id = %s
+            """
+            cursor.execute(sql_guide, [guide_id])
+            guide_row = cursor.fetchone()
+
+            if not guide_row:
+                return JsonResponse({"status": "error", "message": "戰術日誌不存在"}, status=404)
+
+            # 2. 獲取該篇攻略的所有留言 (JOIN 留言者)
+            sql_comments = """
+                SELECT c.comment_text, u.nickname, u.user_id
+                FROM guide_comment c
+                JOIN reg_user u ON c.user_id = u.user_id
+                WHERE c.guide_id = %s
+            """
+            cursor.execute(sql_comments, [guide_id])
+            comment_rows = cursor.fetchall()
+
+            comments = []
+            for c in comment_rows:
+                comments.append({
+                    "text": c[0],
+                    "nickname": c[1],
+                    "user_id": c[2]
+                })
+
+            data = {
+                "guide_id": guide_row[0],
+                "title": guide_row[1],
+                "content": guide_row[2],
+                "created_at": str(guide_row[3]),
+                "author_nickname": guide_row[4],
+                "stage_id": guide_row[5],
+                "stage_name": guide_row[6],
+                "energy_cost": guide_row[7],
+                "author_id": guide_row[8],
+                "comments": comments
+            }
+
+            return JsonResponse({"status": "success", "data": data}, json_dumps_params={'ensure_ascii': False})
+
+    except DatabaseError as e:
+        print(f"[Guide Detail Error]: {e}")
+        return JsonResponse({"status": "error", "message": "讀取日誌失敗"}, status=500)
+
+# 24.【Create】新增留言 (指名攻略 ID)
+@csrf_exempt
+def post_guide_comment(request, guide_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_id = data.get('user_id')
+            comment_text = data.get('comment_text') # 根據題目要求名稱為 comment_text
+
+            if not user_id or not comment_text:
+                return JsonResponse({"status": "error", "message": "留言內容與使用者ID不可為空"}, status=400)
+
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO guide_comment (guide_id, user_id, comment_text) VALUES (%s, %s, %s)"
+                cursor.execute(sql, [guide_id, user_id, comment_text])
+                
+            return JsonResponse({"status": "success", "message": "通訊已送達 // 留言成功"})
+
+        except DatabaseError as e:
+            print(f"[Comment Post Error]: {e}")
+            return JsonResponse({"status": "error", "message": "發送失敗"}, status=500)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
+
+# 25.【Read 查詢】全域搜尋系統 (對應 GET 請求)
+# 目的：一次搜尋幹員、攻略、以及關卡，並回傳統一格式結果
+def global_search(request):
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({"status": "success", "results": []})
+
+    try:
+        results = []
+        with connection.cursor() as cursor:
+            # 1. 搜尋幹員 (以名稱為主)
+            sql_ops = "SELECT operator_id, name, rarity, class FROM operator WHERE name LIKE %s LIMIT 8"
+            cursor.execute(sql_ops, [f'%{query}%'])
+            for r in cursor.fetchall():
+                results.append({
+                    "type": "operator",
+                    "id": r[0],
+                    "title": r[1],
+                    "subtitle": f"{r[2]}星 {r[3]}",
+                    "url": f"/operator/{r[0]}"
+                })
+
+            # 2. 搜尋攻略
+            sql_guides = "SELECT guide_id, title, stage_id FROM guides WHERE title LIKE %s LIMIT 8"
+            cursor.execute(sql_guides, [f'%{query}%'])
+            for r in cursor.fetchall():
+                results.append({
+                    "type": "guide",
+                    "id": r[0],
+                    "title": r[1],
+                    "subtitle": f"玩家攻略 - 關卡: {r[2]}",
+                    "url": f"/guide_detail.html?id={r[0]}"
+                })
+            
+            # 3. 搜尋關卡
+            sql_stages = "SELECT stage_id, name FROM stages WHERE stage_id LIKE %s OR name LIKE %s LIMIT 5"
+            cursor.execute(sql_stages, [f'%{query}%', f'%{query}%'])
+            for r in cursor.fetchall():
+                results.append({
+                    "type": "stage",
+                    "id": r[0],
+                    "title": r[1] if r[1] else r[0],
+                    "subtitle": f"行動代碼: {r[0]}",
+                    "url": f"/operators.html?stage={r[0]}"
+                })
+
+        return JsonResponse({"status": "success", "results": results}, json_dumps_params={'ensure_ascii': False})
+    except DatabaseError as e:
+        print(f"[Global Search Error]: {e}")
+        return JsonResponse({"status": "error", "message": "搜尋服務暫時不可用"}, status=500)

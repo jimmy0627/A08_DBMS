@@ -46,19 +46,31 @@
     // --- 核心邏輯 ---
 
     async function loadHomepageData() {
+      // Identity Check for Greeting
+      const user = auth.getUser();
+      const welcomeText = document.getElementById('welcome-text');
+      if (user && welcomeText) {
+          welcomeText.textContent = `歡迎歸來，${user.nickname} 博士`;
+      }
+
       try {
-        // 1. 獲取核心資料
-        const [operatorsPayload, stagesPayload] = await Promise.all([
+        // 1. 獲取核心資料與全局統計
+        const [operatorsPayload, stagesPayload, statsPayload] = await Promise.all([
           fetchApi('/operators/list/'),
-          fetchApi('/stages/')
+          fetchApi('/stages/'),
+          fetchApi('/stats/global/')
         ]);
 
         const operators = unwrapList(operatorsPayload);
         const stages = unwrapList(stagesPayload);
+        const stats = statsPayload.status === 'success' ? statsPayload.counts : { operators: 0, materials: 0, guides: 0 };
 
         // 2. 更新簡報
         if (elements.briefing) {
-            elements.briefing.innerHTML = `正在連線至羅德島數據庫...<br>當前已載入 ${operators.length} 名幹員檔案與 ${stages.length} 個作戰區域數據。`;
+            elements.briefing.innerHTML = `正在連線至羅德島數據庫...<br>
+            當前已載入 <span style="color:var(--teal); font-weight:800">${stats.operators}</span> 名幹員檔案、
+            <span style="color:var(--teal); font-weight:800">${stats.materials}</span> 種物資數據與 
+            <span style="color:var(--teal); font-weight:800">${stats.guides}</span> 份戰術指南。`;
         }
 
         // 3. 渲染「活動/重點作戰」看板 (取最後一個關卡作為當前活動)
@@ -67,27 +79,26 @@
             elements.eventSection.innerHTML = `
                 <div class="event-card" onclick="location.href='/operators?search=${currentStage.stage_id}'" style="cursor:pointer">
                   <div class="event-meta">
-                    <span class="count">${operators.length}</span>
+                    <span class="count">${stats.operators}</span>
                     <p>已載入幹員 / OPS</p>
-                    <span class="status-badge" style="background:var(--teal); color:#000;">FEATURED STAGE</span>
+                    <span class="status-badge" style="background:var(--teal); color:#000;">SYSTEM ONLINE</span>
                   </div>
                   <div class="event-content">
                     <h2>${currentStage.stage_id} // 戰術目標</h2>
-                    <p class="event-desc">${currentStage.description || '點擊查看推薦幹員與掉落數據'}</p>
+                    <p class="event-desc">${currentStage.description || '點擊查看推薦幹員及掉落數據'} <br>目前共有 ${stats.guides} 篇相關攻略。</p>
                   </div>
                 </div>
             `;
         }
 
-        // 4. 渲染「最新幹員」 (取前 3 個)
+        // 4. 渲染「最新幹員」 (取前 6 個以增加豐富度)
         if (elements.operatorsList) {
-            elements.operatorsList.innerHTML = operators.slice(0, 3).map(op => `
+            elements.operatorsList.innerHTML = operators.slice(0, 6).map(op => `
                 <div class="op-card" onclick="location.href='/operator/${op.operator_id}'" style="cursor:pointer">
-                  <div class="op-thumb" style="background-image: url('${op.image_url || '/static/images/operators/default.png'}'); background-size: cover; display: flex; align-items: center; justify-content: center; background-position: top center;">
-                    ${!op.image_url ? op.name[0] : ''}
+                  <div class="op-thumb" style="background-image: url('/static/images/operators/${op.operator_id}.png'); background-size: cover; display: flex; align-items: center; justify-content: center; background-position: top center;">
                     <div style="position:absolute; bottom:0; width:100%; height:4px; background:var(--teal); opacity:0.8"></div>
                   </div>
-                  <div class="op-tag">${op.class.toUpperCase()} // PERSONNEL</div>
+                  <div class="op-tag">${(op.class || 'UNCODED').toUpperCase()} // PERSONNEL</div>
                   <p>${op.name}</p>
                 </div>
             `).join('');
@@ -125,13 +136,5 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         loadHomepageData();
-        
-        // 搜尋框監聽
-        elements.searchInput?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = e.target.value.trim();
-                if (query) location.href = `/operators?search=${encodeURIComponent(query)}`;
-            }
-        });
     });
 })();

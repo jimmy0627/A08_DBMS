@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Results // Rhodes Island Database</title>
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <script src="/javascripts/auth.js"></script>
+  <script defer src="/javascripts/global_search.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a href="/" class="logo">RHODES ISLAND DATABASE</a>
+      <div class="header-search">
+        <input type="text" placeholder="搜尋幹員、素材、關卡..." id="search-page-input">
+      </div>
+      <div class="header-actions">
+        <!-- Auth will handle this -->
+      </div>
+    </header>
+
+    <main class="dashboard" style="padding: 40px; max-width: 1000px; margin: 0 auto; min-height: 80vh;">
+      <section class="search-header" style="border-left: 4px solid var(--teal); padding-left: 20px;">
+        <h1 style="color: var(--teal); font-weight: 800; letter-spacing: 0.1em; margin: 0;">數據檢索結果 // SEARCH_RESULTS</h1>
+        <p id="search-summary" style="color: var(--muted); font-size: 0.9rem; margin-top: 8px;">正在檢索核心數據庫...</p>
+      </section>
+
+      <div class="search-results-list" id="search-results-list" style="margin-top: 40px; display: grid; gap: 16px;">
+        <!-- Results go here -->
+        <div class="loading-full" style="padding: 100px; text-align: center; color: var(--teal); font-weight: 900; letter-spacing: 0.2em;">
+          [ ANALYZING_QUERY_STRING... ]
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>PRTS // Rhodes Island Database Interface</p>
+    </footer>
+  </div>
+  
+  <script>
+    (async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('q');
+      const resultsContainer = document.getElementById('search-results-list');
+      const summary = document.getElementById('search-summary');
+      const pageInput = document.getElementById('search-page-input');
+
+      if (pageInput && query) pageInput.value = query;
+
+      if (!query) {
+        summary.textContent = '未提供有效的檢索關鍵字。';
+        resultsContainer.innerHTML = '<div style="padding: 60px; text-align: center; color: var(--muted); background: rgba(255,255,255,0.02); border: 1px dashed var(--border);">請輸入搜尋內容。</div>';
+        return;
+      }
+
+      summary.textContent = `針對密鑰 "${query}" 的深度檢索結果：`;
+
+      try {
+        const resp = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+        const data = await resp.json();
+
+        if (data.status === 'success') {
+          if (data.results.length === 0) {
+            resultsContainer.innerHTML = `
+              <div style="padding: 80px; text-align: center; color: var(--muted); background: rgba(255,255,255,0.02); border: 1px dashed var(--border);">
+                <div style="font-size: 2rem; margin-bottom: 20px;">∅</div>
+                查無匹配之人員、行動紀錄或關卡情報。<br>
+                請嘗試更換關鍵字或檢查拼寫是否正確。
+              </div>
+            `;
+          } else {
+            resultsContainer.innerHTML = data.results.map(item => `
+              <a href="${item.url}" class="panel" style="display: flex; align-items: center; padding: 24px; gap: 24px; text-decoration: none; transition: all 0.2s; border-left: 2px solid transparent;">
+                <style>
+                  .panel:hover { border-left-color: var(--teal) !important; background: rgba(255,255,255,0.05) !important; transform: translateX(5px); }
+                </style>
+                <div style="width: 56px; height: 56px; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 900; color: ${item.type === 'operator' ? 'var(--gold)' : (item.type === 'guide' ? 'var(--teal)' : 'var(--red)')}; border: 1px solid currentColor;">
+                  ${item.type === 'operator' ? 'OPR' : (item.type === 'guide' ? 'LOG' : 'STG')}
+                </div>
+                <div style="flex: 1;">
+                  <h3 style="color: var(--text); margin: 0; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.05em;">${item.title}</h3>
+                  <p style="color: var(--muted); margin: 4px 0 0; font-size: 0.8rem;">${item.subtitle}</p>
+                </div>
+                <div style="color: var(--teal); font-size: 0.75rem; font-weight: 800; border: 1px solid var(--teal); padding: 4px 12px; letter-spacing: 0.1em;">
+                  READ_DATA
+                </div>
+              </a>
+            `).join('');
+          }
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (err) {
+        summary.textContent = '羅德島伺服器連線中斷。';
+        resultsContainer.innerHTML = `<div style="padding: 60px; text-align: center; color: var(--red);">[ ERROR: ${err.message} ]</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>

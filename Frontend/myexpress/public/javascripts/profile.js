@@ -61,24 +61,53 @@ async function loadProfileData(userId) {
                     `;
                     rosterGrid.appendChild(unit);
 
-                    // Update Tracker (only show if not at target yet)
-                    if (item.current_elite < item.target_elite || (item.current_elite === item.target_elite && item.current_level < item.target_level)) {
-                        const li = document.createElement('li');
-                        li.className = 'tracker-item';
-                        li.innerHTML = `
-                            <div class="op-identity">
+                    // Update Tracker (Redesigned with Calculator)
+                    const li = document.createElement('li');
+                    li.className = 'tracker-item';
+                    li.id = `tracker-${item.operator_id}`;
+                    
+                    li.innerHTML = `
+                        <div class="tracker-main-row" onclick="event.stopPropagation()">
+                            <div class="op-brief">
                                 <h4>${item.name}</h4>
-                                <span>// OP-ID: ${item.operator_id}</span>
+                                <span>ELITE PROMOTION PLAN</span>
                             </div>
-                            <div class="progress-display">
-                                <span>E${item.current_elite} / LV ${item.current_level}</span>
-                                <span class="arrow-sep">〉</span>
-                                <span class="progress-target">E${item.target_elite} / LV ${item.target_level}</span>
+                            
+                            <div class="inputs-area">
+                                <div class="select-group">
+                                    <label>CURR</label>
+                                    <select class="tracker-select" id="curr-e-${item.operator_id}">
+                                        <option value="0" ${item.current_elite==0?'selected':''}>Elite 0</option>
+                                        <option value="1" ${item.current_elite==1?'selected':''}>Elite 1</option>
+                                        <option value="2" ${item.current_elite==2?'selected':''}>Elite 2</option>
+                                    </select>
+                                </div>
+
+                                <span style="color:var(--muted); font-weight:900; font-size:1.2rem;">〉〉</span>
+
+                                <div class="select-group">
+                                    <label>TARGET</label>
+                                    <select class="tracker-select" id="targ-e-${item.operator_id}">
+                                        <option value="0" ${item.target_elite==0?'selected':''}>Elite 0</option>
+                                        <option value="1" ${item.target_elite==1?'selected':''}>Elite 1</option>
+                                        <option value="2" ${item.target_elite==2?'selected':''}>Elite 2</option>
+                                    </select>
+                                </div>
+                                
+                                <button class="btn-recalc" onclick="recalculateUpgrade(${userId}, ${item.operator_id})">
+                                    CALCULATE MATERIALS
+                                </button>
                             </div>
-                            <button class="btn-material" onclick="location.href='/operator/${item.operator_id}'">詳細檔案</button>
-                        `;
-                        trackerList.appendChild(li);
-                    }
+                        </div>
+                        <div class="material-accordion" id="accordion-${item.operator_id}">
+                            <div class="materials-inner">
+                                <div class="material-report-grid" id="mat-grid-${item.operator_id}">
+                                    <!-- Dynamic Material Cards -->
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    trackerList.appendChild(li);
                 });
 
                 if (trackerList.innerHTML === '') {
@@ -105,7 +134,9 @@ async function loadProfileData(userId) {
                     item.innerHTML = `
                         <div class="record-stage">${rec.stage_id}</div>
                         <div class="record-main">
-                            <div class="record-title">${rec.title}</div>
+                            <div class="record-title">
+                                <a href="/guide_detail.html?id=${rec.id}" class="guide-link">${rec.title}</a>
+                            </div>
                             <div class="record-meta">
                                 ${rec.date}
                                 <span class="status-tag status-${rec.status}">
@@ -136,7 +167,7 @@ function getRarityColor(id) {
 async function deleteFromRoster(opId, opName) {
     if (!confirm(`[警告] 確定要將幹員「${opName}」的人事檔案從名冊中註銷嗎？\n此動作不可逆。`)) return;
 
-    const user = JSON.parse(localStorage.getItem('prts_user') || 'null');
+    const user = auth.getUser();
     if (!user) return;
 
     try {
@@ -156,4 +187,77 @@ async function deleteFromRoster(opId, opName) {
     }
 }
 
+/**
+ * Recalculate material requirements based on user selection
+ */
+async function recalculateUpgrade(userId, opId) {
+    const ce = document.getElementById(`curr-e-${opId}`).value;
+    const cl = 1; // Default since level UI is removed
+    const te = document.getElementById(`targ-e-${opId}`).value;
+    const tl = 90; // Default since level UI is removed
+
+    const accordion = document.getElementById(`accordion-${opId}`);
+    const grid = document.getElementById(`mat-grid-${opId}`);
+    const itemWrapper = document.getElementById(`tracker-${opId}`);
+
+    try {
+        const res = await fetch(`/api/users/${userId}/operators/${opId}/calc-upgrade/?curr_elite=${ce}&curr_level=${cl}&targ_elite=${te}&targ_level=${tl}`);
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            grid.innerHTML = '';
+            
+            if (data.total_materials.length === 0) {
+                grid.innerHTML = '<p style="color:var(--muted); padding:10px;">目標區間內無精英化素材需求</p>';
+            } else {
+                data.total_materials.forEach(mat => {
+                    const card = document.createElement('div');
+                    card.className = `mat-card ${mat.best_stage ? 'has-data' : 'no-data'}`;
+                    
+                    let stageInfoHtml = '';
+                    if (mat.best_stage) {
+                        stageInfoHtml = `
+                            <div class="mat-stage-info">
+                                RECOMMENDED: <span class="mat-stage-id">${mat.best_stage.stage_id}</span> 
+                                (${mat.best_stage.drop_rate})
+                            </div>
+                            <div class="mat-prediction">
+                                EST. RUNS: ${mat.best_stage.expected_runs} | TOTAL AP: ${mat.best_stage.expected_energy}
+                            </div>
+                        `;
+                    } else {
+                        stageInfoHtml = `
+                            <div class="no-data-msg">
+                                [ DATA MISSING ] // 無法取得掉落資訊
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div class="mat-icon-box">
+                            <img src="${mat.icon}" alt="${mat.name}" style="width:100%; height:100%; object-fit:contain;">
+                        </div>
+                        <div class="mat-body">
+                            <div class="mat-info-top">
+                                <span class="mat-name">${mat.name}</span>
+                                <span class="mat-req">x${mat.amount}</span>
+                            </div>
+                            ${stageInfoHtml}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            // Show Accordion
+            itemWrapper.classList.add('active');
+            accordion.classList.add('show');
+        }
+    } catch (err) {
+        console.error('Calculation failed', err);
+        alert('計算請求失敗，連線受阻');
+    }
+}
+
+window.recalculateUpgrade = recalculateUpgrade;
 window.deleteFromRoster = deleteFromRoster;

@@ -6,7 +6,8 @@
         searchQuery: '',
         filterClass: 'all',
         sortKey: 'rarity',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
+        eliteStage: 0
     };
 
     let elements = {};
@@ -36,8 +37,35 @@
         });
 
         result.sort((a, b) => {
-            let valA = parseFloat(a[state.sortKey]) || 0;
-            let valB = parseFloat(b[state.sortKey]) || 0;
+            let valA, valB;
+            
+            // Check if we need to sort by a stat which might vary by elite stage
+            const statKeys = ['hp', 'atk', 'def', 'res', 'cost', 'block', 'redeploy', 'atk_spd'];
+            if (statKeys.includes(state.sortKey)) {
+                // 修正：對齊 Detail 頁面，使用 all_stats 欄位
+                const states = a.all_stats || a.states || [];
+                const stateA = states.find(s => s.elite_stage == state.eliteStage) || a;
+                const stateB = (b.all_stats || b.states || []).find(s => s.elite_stage == state.eliteStage) || b;
+                
+                // 根據資料庫 Schema 處理欄位映射 (優先取 max 數值作為排序基準)
+                const getVal = (s, key) => {
+                    if (key === 'hp') return parseFloat(s.max_hp || s.hp) || 0;
+                    if (key === 'atk') return parseFloat(s.max_atk || s.atk) || 0;
+                    if (key === 'def') return parseFloat(s.max_def || s.def) || 0;
+                    if (key === 'res') return parseFloat(s.max_res || s.res) || 0;
+                    if (key === 'block') return parseFloat(s.stop_amount || s.block) || 0;
+                    if (key === 'redeploy') return parseFloat(s.deploy_cd || s.redeploy) || 0;
+                    if (key === 'atk_spd') return parseFloat(s.atk_cd || s.atk_spd) || 0;
+                    return parseFloat(s[key]) || 0;
+                };
+
+                valA = getVal(stateA, state.sortKey);
+                valB = getVal(stateB, state.sortKey);
+            } else {
+                valA = parseFloat(a[state.sortKey]) || 0;
+                valB = parseFloat(b[state.sortKey]) || 0;
+            }
+
             if (valA < valB) return state.sortOrder === 'desc' ? 1 : -1;
             if (valA > valB) return state.sortOrder === 'desc' ? -1 : 1;
             return 0;
@@ -57,6 +85,20 @@
     }
 
     function setupEventListeners() {
+        // Elite Toggle Event
+        document.querySelectorAll('.btn-elite').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const newStage = parseInt(e.target.dataset.elite);
+                state.eliteStage = newStage;
+                
+                // Update UI state
+                document.querySelectorAll('.btn-elite').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                applyFiltersAndSort();
+            });
+        });
+
         elements.searchInput?.addEventListener('input', (e) => {
             state.searchQuery = e.target.value.trim().toLowerCase();
             applyFiltersAndSort();
@@ -100,6 +142,19 @@
             elements.btnSort.innerHTML = `<span class="icon">⇅</span> ${titleText}排序`;
             applyFiltersAndSort();
         });
+
+        // 精英化切換監聽
+        document.querySelector('.elite-toggle-group')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-elite');
+            if (!btn) return;
+            
+            document.querySelectorAll('.btn-elite').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            state.eliteStage = parseInt(btn.dataset.elite);
+            applyFiltersAndSort();
+        });
+
         elements.listContainer?.addEventListener('click', (e) => {
         // 尋找被點擊的元素是否為 Roster 按鈕 (包含點擊到按鈕內的 span)
         const rosterBtn = e.target.closest('.btn-add-roster');
@@ -132,6 +187,19 @@
             const rarityNum = parseInt(op.rarity) || 1;
             const rarityStr = '★'.repeat(rarityNum);
             
+            // Get current stats based on elite stage (修正使用 all_stats)
+            const states = op.all_stats || op.states || [];
+            let currentStats = states.find(s => s.elite_stage == state.eliteStage);
+            
+            // Fallback to top-level stats if nested states are not available
+            if (!currentStats) {
+                currentStats = op;
+            }
+
+            // Get tags for the operator
+            const tags = Array.isArray(op.tags) ? op.tags : [];
+            const tagHtml = tags.map(t => `<span class="tag-meta" style="border: 1px solid rgba(255,255,255,0.2); padding: 1px 6px; font-size: 0.65rem; color: var(--muted);">${t}</span>`).join('');
+
             let actionHtml = `
                 <a href="/operator/${id}" class="btn-details">
                     <span class="arrow">〉</span>
@@ -154,29 +222,34 @@
             return `
                 <div class="operator-row">
                     <div class="col-portrait">
-                       <div class="portrait-box"></div>
+                       <div class="portrait-box" style="background-image: url('/static/images/operators/${id}.png'); background-size: cover; background-position: top center; border-bottom: 2px solid var(--teal); background-color: #000;">
+                         ${!id ? '?' : ''}
+                       </div>
                        <div class="rarity-stars">${rarityStr}</div>
                     </div>
                     <div class="col-info">
-                        <div class="name-group" style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px;">
+                        <div class="name-group" style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;">
                             <h2 class="name-tw" style="margin:0; font-size: 1.8rem; font-weight: 800;">${name}</h2>
-                            <span class="name-en" style="font-size: 0.7rem; color: var(--muted); letter-spacing: 0.2em; font-weight: 800;">// OPERATOR ID: ${id}</span>
+                            <span class="name-en" style="font-size: 0.7rem; color: var(--muted); letter-spacing: 0.2em; font-weight: 800;">// ${op.en_name || 'UNCODED'}</span>
                         </div>
-                        <div class="tag-group" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <div class="tag-group" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
                             <span class="tag-class" style="background: var(--teal); color: #000; padding: 2px 10px; font-weight: 800; font-size: 0.75rem;">${op.class || '未分類'}</span>
                             <span class="tag-branch" style="border: 1px solid var(--border); padding: 2px 10px; font-size: 0.75rem; color: var(--text);">${op.branch || '--'}</span>
-                            <span class="meta-info" style="color: var(--muted); font-size: 0.75rem; padding-top: 2px;">${op.position || '--'} // ${op.sex || '--'}</span>
+                            <span class="meta-info" style="color: var(--muted); font-size: 0.75rem; padding-top: 2px;">${op.position || '--'} / ${op.sex || '--'}</span>
+                        </div>
+                        <div class="op-tags-list" style="display: flex; gap: 4px;">
+                            ${tagHtml}
                         </div>
                     </div>
                     <div class="col-stats">
-                        <div class="stat-item"><span class="label">♡ HP</span><span class="value">${op.hp || '--'}</span></div>
-                        <div class="stat-item"><span class="label">☼ ATK</span><span class="value">${op.atk || '--'}</span></div>
-                        <div class="stat-item"><span class="label">⛨ DEF</span><span class="value">${op.def || '--'}</span></div>
-                        <div class="stat-item"><span class="label">🛡️ RES</span><span class="value">${op.res || '0'}</span></div>
-                        <div class="stat-item"><span class="label">⚡ COST</span><span class="value">${op.cost || '--'}</span></div>
-                        <div class="stat-item"><span class="label">⚓ BLOCK</span><span class="value">${op.block || '--'}</span></div>
-                        <div class="stat-item"><span class="label">⌛ RE-DEP</span><span class="value">${op.redeploy || '--'}s</span></div>
-                        <div class="stat-item"><span class="label">⚔️ ATK-SPD</span><span class="value">${op.atk_spd || '--'}s</span></div>
+                        <div class="stat-item"><span class="label">♡ HP</span><span class="value">${currentStats.max_hp || currentStats.hp || '--'}</span></div>
+                        <div class="stat-item"><span class="label">❂ ATK</span><span class="value">${currentStats.max_atk || currentStats.atk || '--'}</span></div>
+                        <div class="stat-item"><span class="label">⛨ DEF</span><span class="value">${currentStats.max_def || currentStats.def || '--'}</span></div>
+                        <div class="stat-item"><span class="label">🛡️ RES</span><span class="value">${currentStats.max_res || currentStats.res || '0'}</span></div>
+                        <div class="stat-item"><span class="label">⚡ COST</span><span class="value">${currentStats.cost || '--'}</span></div>
+                        <div class="stat-item"><span class="label">⚓ BLOCK</span><span class="value">${currentStats.stop_amount || currentStats.block || '--'}</span></div>
+                        <div class="stat-item"><span class="label">⌛ REDEP</span><span class="value">${currentStats.deploy_cd || currentStats.redeploy || '--'}s</span></div>
+                        <div class="stat-item"><span class="label">⚔️ ATK-SPD</span><span class="value">${currentStats.atk_cd || currentStats.atk_spd || '--'}s</span></div>
                     </div>
                     <div class="col-action">
                         ${actionHtml}

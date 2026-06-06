@@ -12,6 +12,7 @@ urlpatterns = [
     # 攻略系統
     path('stages/<str:stage_id>/guides/', views.get_guides_by_stage),
     path('guides/create/', views.create_guide),
+    path('guides/<int:guide_id>/detail/', views.get_guide_detail),
     path('guides/<int:guide_id>/delete/', views.delete_guide),
     
     # 個人庫更新
@@ -48,9 +49,22 @@ urlpatterns = [
     
     # 新增攻略留言
     path('guides/comments/create/', views.create_guide_comment),
+    path('guides/<int:guide_id>/comments/create/', views.post_guide_comment),
     # 刪除攻略留言
     path('guides/<int:guide_id>/comments/delete/', views.delete_guide_comment),
     
     # 載入幹員詳細資料
     path('operator/<str:op_id>/detail/', views.get_operator_detail),
+    
+    # 動態數值插值 API
+    path('operator/<int:op_id>/stats/interp/', views.get_interp_stats),
+    
+    # 升級計畫計算 API
+    path('users/<int:user_id>/operators/<int:op_id>/calc-upgrade/', views.calc_upgrade_plan),
+    
+    # 全局統計數據
+    path('stats/global/', views.get_global_stats),
+
+    # 全域搜尋系統
+    path('search/', views.global_search),
 ]

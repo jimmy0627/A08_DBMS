@@ -197,6 +197,17 @@
       font-size: 1rem;
       font-weight: 800;
     }
+    .guide-link {
+        color: var(--text);
+        text-decoration: none;
+        transition: var(--transition);
+        font-weight: 800;
+        border-bottom: 1px solid transparent;
+    }
+    .guide-link:hover {
+        color: var(--teal);
+        border-bottom-color: var(--teal);
+    }
     .record-meta {
       font-size: 0.75rem;
       color: var(--muted);
@@ -285,14 +296,180 @@
       font-family: monospace;
       text-transform: uppercase;
     }
+
+    /* Redesigned Tracker Styles */
+    .tracker-item {
+        flex-direction: column;
+        align-items: stretch;
+        background: rgba(255, 255, 255, 0.02);
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+        padding: 0;
+    }
+    .tracker-main-row {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid transparent;
+        transition: var(--transition);
+    }
+    .tracker-item.active .tracker-main-row {
+        border-color: rgba(41, 182, 246, 0.2);
+        background: rgba(41, 182, 246, 0.03);
+    }
+    .op-brief {
+        width: 180px;
+    }
+    .op-brief h4 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+    .op-brief span {
+        font-size: 0.85rem;
+        color: var(--teal);
+        font-weight: 900;
+        letter-spacing: 1px;
+    }
+    .inputs-area {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+    }
+    .select-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #000;
+        border: 1px solid var(--border);
+        padding: 2px 8px;
+    }
+    .select-group label {
+        font-size: 0.75rem;
+        font-weight: 800;
+        color: var(--muted);
+    }
+    .tracker-select {
+        background: transparent;
+        border: none;
+        color: var(--teal);
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+        cursor: pointer;
+        padding: 6px;
+        outline: none;
+        font-size: 1rem;
+    }
+    .tracker-select option {
+        background: #111;
+        color: #fff;
+    }
+    .level-input {
+        width: 35px;
+        background: transparent;
+        border: none;
+        color: #fff;
+        text-align: center;
+        font-weight: 800;
+        font-family: inherit;
+        outline: none;
+    }
+    .btn-recalc {
+        padding: 10px 20px;
+        border: 1px solid var(--teal);
+        background: transparent;
+        color: var(--teal);
+        font-size: 0.95rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-left: 20px;
+    }
+    .btn-recalc:hover {
+        background: var(--teal);
+        color: #000;
+        box-shadow: 0 0 15px rgba(41, 182, 246, 0.3);
+    }
+
+    /* Accordion Area */
+    .material-accordion {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+        background: rgba(0, 0, 0, 0.3);
+    }
+    .material-accordion.show {
+        max-height: 2000px;
+        transition: max-height 0.8s ease-in-out;
+        border-top: 1px solid var(--border);
+    }
+    .materials-inner {
+        padding: 20px;
+    }
+    .material-report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+    }
+    .mat-card {
+        background: #0d0d0d;
+        border-left: 3px solid var(--border);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 16px;
+        align-items: center;
+    }
+    .mat-card.has-data { border-left-color: var(--teal); }
+    .mat-card.no-data { border-left-color: var(--red); }
+    
+    .mat-icon-box {
+        width: 48px;
+        height: 48px;
+        background: #000;
+        border: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mat-info-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+    .mat-name { font-weight: 800; font-size: 1.1rem; }
+    .mat-req { color: var(--teal); font-weight: 900; font-size: 1.3rem; }
+    .mat-stage-info {
+        font-size: 0.9rem;
+        margin-top: 4px;
+        color: var(--muted);
+    }
+    .mat-stage-id { color: var(--text); font-weight: 800; }
+    .mat-prediction {
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: #f0c14b; /* Gold/Orange */
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .no-data-msg {
+        color: var(--red);
+        font-weight: 800;
+        font-size: 0.7rem;
+        margin-top: 5px;
+    }
   </style>
   <script src="/javascripts/auth.js"></script>
+  <script defer src="/javascripts/global_search.js"></script>
   <script defer src="/javascripts/profile.js"></script>
 </head>
 <body>
   <div class="page-shell">
     <header class="topbar">
-      <div class="logo" onclick="location.href='/'" style="cursor: pointer;">RHODES ISLAND DATABASE</div>
+      <a href="/" class="logo">RHODES ISLAND DATABASE</a>
       <div class="header-actions">
         <!-- Auth injected by auth.js -->
       </div>
@@ -308,20 +485,21 @@
             <img id="profile-avatar" src="https://via.placeholder.com/80/0a0a0a/333333?text=RI" alt="AVATAR">
           </div>
           <div class="user-info">
-            <h1 class="user-name" id="profile-nickname">DOCTOR</h1>
-            <p class="user-meta" id="profile-uid">#RI-0000</p>
-            <p class="user-meta" id="profile-email">loading@rhodes.com</p>
+            <h1 class="user-name" id="profile-nickname">LOADING...</h1>
+            <p class="user-meta" id="profile-uid">PENDING...</p>
+            <p class="user-meta" id="profile-email">PENDING...</p>
             <span class="auth-tag">[ AUTHORIZED USER ]</span>
           </div>
           <div class="stats-area">
             <div class="stat-item">
-              <span class="stat-value" id="count-operators">0</span>
+              <span class="stat-value" id="count-operators">..</span>
               <span class="stat-label">OPERATORS 持有</span>
             </div>
             <div class="stat-item">
-              <span class="stat-value" id="count-guides">0</span>
+              <span class="stat-value" id="count-guides">..</span>
               <span class="stat-label">GUIDES 攻略</span>
             </div>
+          </div>
           </div>
         </div>
       </section>
@@ -337,7 +515,10 @@
 
         <!-- Module 3: Combat Records -->
         <section class="panel" style="padding: 24px;">
-          <h2 class="dossier-header" style="font-size: 1.1rem;">COMBAT RECORDS // 戰術授權紀錄</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px;">
+            <h2 class="dossier-header" style="font-size: 1.1rem; border-bottom: none; margin-bottom: 0; padding-bottom: 0;">COMBAT RECORDS // 戰術授權紀錄</h2>
+            <button onclick="location.href='/guide_editor.html'" style="background: var(--teal); color: #000; border: none; padding: 6px 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer;">[ + NEW RECORD // 新增戰術紀錄 ]</button>
+          </div>
           <div class="records-container" id="guides-list">
             <div class="loading-state" style="padding: 20px; color: var(--muted); font-size: 0.85rem; font-weight: 800;">[ STATUS ] 正在檢索戰術紀錄...</div>
           </div>

@@ -7,7 +7,7 @@
 您可以直接複製並在 VS Code 終端機執行此連結指令：
 
 ```powershell
-& "d:/VS new clone/A08_DBMS/Wiki_Database/.venv/Scripts/python.exe" manage.py runserver
+& ![alt text](image.png)
 ```
 
 ## 常用指令清單

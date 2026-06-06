@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>PRTS 戰術分析備忘錄 - Arknights Wiki</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+
+  <div class="page-shell">
+    <!-- Topbar (Reused) -->
+    <header class="topbar">
+      <div class="logo" onclick="window.location.href='/'" style="cursor:pointer;">PRTS.DB</div>
+      <div class="header-search">
+        <input type="text" placeholder="搜尋攻略、幹員、關卡...">
+      </div>
+      <div class="header-actions">
+        <a href="/profile.html" class="btn btn-outline">我的檔案</a>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <!-- Top Decoration Line -->
+      <div style="border-top: 2px solid var(--teal); margin-bottom: 24px; opacity: 0.5;"></div>
+
+      <div class="guide-layout">
+        <!-- Main Content -->
+        <article class="guide-main panel">
+          <header class="guide-header">
+            <h1 id="guide-title">PRTS // ACCESSING_FILE...</h1>
+            <div class="guide-meta">
+              <span>SOURCE: <strong id="author-name">DATA_PENDING</strong></span>
+              <span class="meta-divider">|</span>
+              <span id="publish-date">YYYY-MM-DD</span>
+            </div>
+          </header>
+
+          <div class="guide-body" id="guide-content">
+            系統正在解密檔案內容，請稍候...
+          </div>
+        </article>
+
+        <!-- Sidebar Info -->
+        <aside class="guide-sidebar">
+          <div class="panel stage-info-card">
+            <div class="card-header">
+              <span class="tag-stage">STAGE</span>
+              <span id="stage-code">UNKNOWN</span>
+            </div>
+            <div class="card-body">
+              <h3 id="stage-name">PENDING_ID</h3>
+              <div class="info-row">
+                <span class="label">理智消耗</span>
+                <span class="value" id="stage-cost">--</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Comment Section -->
+      <section class="comment-section panel">
+        <div class="panel-title">// COMMUNICATION LOG // 通訊記錄</div>
+        <div id="comments-list" class="comments-list">
+          <div style="padding: 16px; color: var(--muted); font-size: 0.8rem;">INITIATING SECURE CHANNEL...</div>
+        </div>
+        
+        <div class="add-comment-box">
+          <textarea id="comment-text" placeholder="輸入傳輸訊息..."></textarea>
+          <button class="btn btn-teal" id="submit-comment">TRANSMIT // 傳送通訊</button>
+        </div>
+      </section>
+
+      <!-- Moderation / Admin Zone -->
+      <section class="admin-zone panel" id="admin-zone" style="display:none; border-top: 2px solid var(--red);">
+        <div class="panel-title" style="color: var(--red);">// MODERATION TERMINAL // 權限操作</div>
+        <div style="padding: 16px; display: flex; justify-content: flex-end;">
+          <button class="btn btn-red" id="delete-guide">
+            [ DECOMMISSION FILE // 撤回文章 ]
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer" style="margin-top: 32px; padding: 24px; text-align: center; border-top: 1px solid var(--border); opacity: 0.6; font-size: 0.8rem;">
+      &copy; 2026 PRTS 終端資料庫. ALL RIGHTS RESERVED.
+    </footer>
+  </div>
+
+  <style>
+    .guide-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .guide-header {
+      padding: 32px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, rgba(41, 182, 246, 0.05), transparent);
+    }
+
+    .guide-header h1 {
+      margin: 0 0 12px 0;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .guide-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .meta-divider {
+      margin: 0 12px;
+      opacity: 0.5;
+    }
+
+    .guide-body {
+      padding: 32px;
+      min-height: 400px;
+      font-size: 1.1rem;
+      white-space: pre-wrap; /* Preserve line breaks */
+    }
+
+    .stage-info-card .card-header {
+      background: var(--teal);
+      color: #000;
+      padding: 12px 20px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tag-stage {
+      background: #000;
+      color: var(--teal);
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      margin-right: 8px;
+    }
+
+    .stage-info-card .card-body {
+      padding: 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .value {
+      color: var(--text);
+      font-weight: bold;
+    }
+
+    /* Comments */
+    .comment-section {
+      padding: 24px;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      border-left: 3px solid var(--teal);
+      padding-left: 12px;
+      margin-bottom: 20px;
+      color: var(--teal);
+    }
+
+    .comments-list {
+      margin-bottom: 24px;
+    }
+
+    .comment-item {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+
+    .comment-user {
+      font-weight: bold;
+      color: var(--teal);
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+
+    .comment-content {
+      font-size: 0.95rem;
+    }
+
+    .add-comment-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+
+    .add-comment-box textarea {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      padding: 16px;
+      color: var(--text);
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .add-comment-box textarea:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+  </style>
+
+  <script src="/javascripts/auth.js"></script>
+  <script defer src="/javascripts/global_search.js"></script>
+  <script src="/javascripts/guide_detail.js"></script>
+</body>
+</html>

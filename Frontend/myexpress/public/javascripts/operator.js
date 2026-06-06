@@ -15,7 +15,12 @@ async function fetchApi(path) {
 
 function getOperatorIdFromUrl() {
   const pathParts = window.location.pathname.split('/');
-  return pathParts[pathParts.length - 1];
+  const lastPart = pathParts[pathParts.length - 1];
+  // 如果路徑結尾是 operator.html，說明是直接存取靜態檔案而非透過 /operator/:id 路由
+  if (lastPart === 'operator.html' || !lastPart) {
+      return new URLSearchParams(window.location.search).get('id');
+  }
+  return lastPart;
 }
 
 async function calculateMaterialReport() {
@@ -122,32 +127,37 @@ function updateStatsDisplay() {
 
     // 線性插值計算公式: 當前值 = 初始值 + (滿級值 - 初始值) * (當前等級 - 1) / (該階段滿級 - 1)
     const calculate = (min, max, maxLvl) => {
-        if (maxLvl <= 1 || level <= 1) return min;
-        if (level >= maxLvl) return max;
+        const minVal = parseFloat(min);
+        const maxVal = parseFloat(max);
+        if (isNaN(minVal) || isNaN(maxVal)) return '--';
+        if (maxLvl <= 1 || level <= 1) return Math.round(minVal);
+        if (level >= maxLvl) return Math.round(maxVal);
         const ratio = (level - 1) / (maxLvl - 1);
-        return Math.round(min + (max - min) * ratio);
+        return Math.round(minVal + (maxVal - minVal) * ratio);
     };
 
     const stats = {
-        hp: calculate(stageData.hp_range.min, stageData.hp_range.max, stageData.max_level),
-        atk: calculate(stageData.atk_range.min, stageData.atk_range.max, stageData.max_level),
-        def: calculate(stageData.def_range.min, stageData.def_range.max, stageData.max_level),
-        res: calculate(stageData.res_range.min, stageData.res_range.max, stageData.max_level),
-        cost: currentOpData.cost || '--',
-        block: currentOpData.block || '--',
-        redeploy: currentOpData.redeploy,
-        atk_spd: currentOpData.atk_spd
+        hp: calculate(stageData.hp_range?.min, stageData.hp_range?.max, stageData.max_level),
+        atk: calculate(stageData.atk_range?.min, stageData.atk_range?.max, stageData.max_level),
+        def: calculate(stageData.def_range?.min, stageData.def_range?.max, stageData.max_level),
+        res: calculate(stageData.res_range?.min ?? stageData.res, stageData.res_range?.max ?? stageData.res, stageData.max_level),
+        // 修正：從 stageData 獲取該階段對應的固定數值 (cost, block, redeploy, atk_spd)
+        // 並優先使用正確的後端欄位名稱 (stop_amount/block, deploy_cd, atk_cd)
+        cost: stageData.cost ?? currentOpData.cost ?? '--',
+        block: stageData.block ?? currentOpData.block ?? '--',
+        redeploy: stageData.redeploy ?? currentOpData.redeploy ?? '--',
+        atk_spd: stageData.atk_spd ?? currentOpData.atk_spd ?? '--'
     };
 
     const fields = [
-        { label: 'HP', val: stats.hp },
-        { label: 'ATK', val: stats.atk },
-        { label: 'DEF', val: stats.def },
-        { label: 'RES', val: stats.res },
-        { label: 'COST', val: stats.cost },
-        { label: 'BLOCK', val: stats.block },
-        { label: 'REDEPLOY', val: stats.redeploy ? stats.redeploy + 's' : '--' },
-        { label: 'ATK SPD', val: stats.atk_spd ? stats.atk_spd + 's' : '--' }
+        { label: '♡ HP', val: stats.hp },
+        { label: '❂ ATK', val: stats.atk },
+        { label: '⛨ DEF', val: stats.def },
+        { label: '🛡️ RES', val: stats.res },
+        { label: '⚡ COST', val: stats.cost },
+        { label: '⚓ BLOCK', val: stats.block },
+        { label: '⌛ RE-DEP', val: stats.redeploy ? stats.redeploy + (typeof stats.redeploy === 'number' ? 's' : '') : '--' },
+        { label: '⚔️ ATK-SPD', val: stats.atk_spd ? stats.atk_spd + (typeof stats.atk_spd === 'number' ? 's' : '') : '--' }
     ];
 
     statsGrid.innerHTML = fields.map(f => `
@@ -177,12 +187,13 @@ function renderDetail(data) {
 
   container.innerHTML = `
     <div class="operator-profile">
-      <section class="section-portrait section-panel">
-        <div class="portrait-placeholder">
+      <section class="section-portrait section-panel" style="position: relative; height: 500px; overflow: hidden; background: #000;">
+        <div class="portrait-box" style="width: 100%; height: 100%; background-image: url('/static/images/operators/${op.id}.png'); background-size: cover; background-position: top center; opacity: 0.8;"></div>
+        <div class="portrait-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; opacity: 0.2;">
           <div class="p-text">PERSONNEL FILE</div>
           <div class="p-sub">ARCHIVE DATA #RI-${op.id}</div>
         </div>
-        <div class="rarity-badge">${rarityStr}</div>
+        <div class="rarity-badge" style="z-index: 2;">${rarityStr}</div>
       </section>
 
       <div class="profile-info-grid">
@@ -248,14 +259,43 @@ function renderDetail(data) {
 
       <section class="section-modules section-panel">
         <h3 style="margin-top: 0; font-size: 0.85rem; color: var(--teal); font-weight: 800; letter-spacing: 0.2em; margin-bottom: 24px;">OPERATOR MODULES // 專屬模組詳情</h3>
-        <div class="modules-list" style="display: grid; gap: 16px;">
+        <div class="modules-list" style="display: grid; gap: 32px;">
           ${op.modules && op.modules.length > 0 ? op.modules.map(m => `
-            <div class="module-item" style="display: grid; grid-template-columns: 60px 1fr; gap: 20px; background: rgba(255,255,255,0.02); padding: 16px; border: 1px solid rgba(255,255,255,0.05);">
-              <div class="m-icon" style="width: 60px; height: 60px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden;">
-                ${m.icon_url ? `<img src="${m.icon_url}" alt="${m.type}" style="width: 100%; height: 100%; object-fit: contain;">` : `<span style="font-size: 1.5rem; font-weight: 900; color: var(--border);">${m.type}</span>`}
+            <div class="module-card" style="display: grid; grid-template-columns: 280px 1fr; gap: 0; background: rgba(255,255,255,0.01); border: 1px solid var(--border); overflow: hidden;">
+              <!-- 左欄：識別與條件區 -->
+              <div class="module-identity" style="padding: 24px; background: rgba(0,0,0,0.2); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                <div class="m-icon-wrapper" style="width: 120px; height: 120px; border: 1px solid rgba(255,255,255,0.1); background: #000; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; box-shadow: inset 0 0 20px rgba(41, 182, 246, 0.05);">
+                   ${m.icon_url ? `<img src="${m.icon_url}" alt="${m.type}" style="width: 80%; height: 80%; object-fit: contain;">` : `<span style="font-size: 2rem; font-weight: 900; color: #333;">${m.type}</span>`}
+                </div>
+                <h4 style="margin: 0 0 16px; color: #FFF; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em;">TYPE ${m.type}</h4>
+                <div class="m-mission-box" style="width: 100%; text-align: left; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 2px;">
+                   <div style="font-size: 0.65rem; color: var(--teal); font-weight: 800; margin-bottom: 6px; letter-spacing: 0.1em;">UNLOCK MISSION // 解鎖任務</div>
+                   <div style="font-size: 0.8rem; color: var(--muted); line-height: 1.5; word-break: break-all;">${m.mission || '無指定任務內容。'}</div>
+                </div>
               </div>
-              <div class="m-info">
-                <div class="m-mission" style="font-size: 0.85rem; color: var(--text);"><strong style="color: var(--teal); margin-right: 12px;">UNLOCK MISSION //</strong> ${m.mission || '無'}</div>
+              
+              <!-- 右欄：升級需求面板 -->
+              <div class="module-upgrade-path" style="padding: 24px; display: flex; flex-direction: column;">
+                <h5 style="margin: 0 0 20px; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;">Upgrade Requirements // 升級所需素材</h5>
+                <div style="display: flex; flex-direction: column; gap: 16px; flex: 1; justify-content: space-between;">
+                  ${Object.keys(m.materials || {}).map(lv => `
+                    <div class="lvl-row" style="display: flex; align-items: center; gap: 20px; min-height: 52px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 12px;">
+                      <div class="lvl-label" style="font-size: 0.9rem; font-weight: 900; color: var(--teal); min-width: 70px; font-family: 'JetBrains Mono', monospace;">LV.${lv.padStart(2, '0')} ›</div>
+                      <div class="mat-group" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        ${m.materials[lv].map(mat => `
+                          <div class="material-obj" style="display: flex; align-items: center; gap: 8px; background: #1a1a1a; padding: 4px 12px 4px 4px; border: 1px solid #333; border-radius: 2px; transition: all 0.2s;">
+                            <div style="width: 36px; height: 36px; background: #222; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05);">
+                               <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; border-radius: 4px; overflow: hidden;">
+                                   <img src="${mat.icon || ''}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 10px; color: var(--muted);\'>${mat.name[0]}</span>';">
+                               </div>
+                            </div>
+                            <span style="font-size: 1rem; font-weight: 800; color: #eee; font-family: 'Inter', sans-serif;">${mat.amount}</span>
+                          </div>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
               </div>
             </div>
           `).join('') : '<p class="empty-msg" style="color: var(--muted); font-size: 0.9rem;">該幹員尚無可用模組。</p>'}

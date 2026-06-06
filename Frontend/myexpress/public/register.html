@@ -14,7 +14,7 @@
     <div class="auth-bg-deco"></div>
 
     <div class="auth-panel" style="max-width: 500px;">
-        <div id="auth-loading" class="auth-loading">
+        <div id="auth-loading" class="auth-loading" style="display:none;">
             <div class="loading-scanner"></div>
             <div class="loading-text">CREATING IDENTITY DOSSIER...</div>
         </div>
@@ -25,13 +25,13 @@
         </div>
 
         <div class="auth-body">
-            <div id="auth-message" class="auth-message"></div>
+            <div id="auth-message" class="auth-message" style="display:none;"></div>
 
             <form id="register-form">
                 <div class="auth-form-group">
                     <label class="auth-label">PERSONNEL_ID // 公開代號</label>
                     <div class="auth-input-wrapper">
-                        <input type="text" id="username" class="auth-input" placeholder="CODENAME_HERE" required>
+                        <input type="text" id="nickname" class="auth-input" placeholder="CODENAME_HERE" required>
                     </div>
                 </div>
 
@@ -57,7 +57,9 @@
                 </div>
 
                 <div class="auth-actions">
-                    <button type="submit" class="auth-btn">CONFIRM_REGISTRATION // 提交建檔</button>
+                    <button type="submit" class="auth-btn" id="submit-btn">
+                        <span class="btn-text">CONFIRM_REGISTRATION // 提交建檔</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -68,9 +70,6 @@
     </div>
 
     <script src="javascripts/auth.js"></script>
-</body>
-</html>
-
-  </div>
+    <script src="javascripts/register.js"></script>
 </body>
 </html>
