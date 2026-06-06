@@ -6,22 +6,27 @@ import json
 # 1.【Read 查詢】查詢所有關卡清單 (對應 GET 請求)
 def get_stages(request):
     try:
-        # 使用 with 語法開啟資料庫游標，確保執行完畢後自動釋放資源
         with connection.cursor() as cursor:
-            # 執行基本的 SELECT 查詢，無外部參數
-            cursor.execute("SELECT stage_id, name, energy_cost FROM Stages")
-            rows = cursor.fetchall() # 撈取所有符合的資料列
+            # SQL 查詢補上 description 欄位
+            cursor.execute("SELECT stage_id, name, energy_cost, map_url, description FROM stages")
+            rows = cursor.fetchall()
             
-            # 將資料庫回傳的 Tuple 格式，轉換為前端易讀的 JSON (List of Dictionaries)
-            result = [{"id": r[0], "name": r[1], "cost": r[2]} for r in rows]
+            result = []
+            for r in rows:
+                result.append({
+                    "id": r[0], 
+                    "name": r[1], 
+                    "cost": r[2],
+                    "map_url": r[3],
+                    "description": r[4]  
+                })
             
-            # ensure_ascii=False 確保回傳的中文不會變成 Unicode 亂碼
             return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
             
     except DatabaseError as e:
-        # 捕捉並處理資料庫異常，回傳 HTTP 500 避免伺服器崩潰
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
+        print(f"[DB Error in get_stages]: {e}")
+        return JsonResponse({"status": "error", "message": "讀取關卡列表失敗"}, status=500)
+    
 # 2.【Read 查詢】查詢特定關卡的掉落素材 (對應 GET 請求)
 def get_stage_drops(request, stage_id):
     try:
@@ -471,14 +476,14 @@ def get_global_stats(request):
         print(f"[Stats Error]: {e}")
         return JsonResponse({"status": "error", "message": "無法取得統計數據"}, status=500)
 
-
+# 14.【Read 查詢】查詢幹員列表 (支援頭像、標籤與各階最大數值陣列)
 def get_operator_list(request):
     try:
         with connection.cursor() as cursor:
-            # 1. 抓取所有幹員基礎資料與標籤
+            # 1. 抓取所有幹員基礎資料與標籤 (補上 avatar_url，並為 class 加上反引號防呆)
             sql_ops = """
                 SELECT 
-                    o.operator_id, o.name, o.rarity, o.class, o.sex, o.branch, o.position,
+                    o.operator_id, o.name, o.rarity, o.`class`, o.sex, o.branch, o.position, o.avatar_url,
                     GROUP_CONCAT(t.tag_name) as tags
                 FROM operator o
                 LEFT JOIN op_tag t ON o.operator_id = t.operator_id
@@ -515,6 +520,7 @@ def get_operator_list(request):
                     "atk_spd": sr[10]
                 })
 
+            # 3. 縫合資料並吐給前端
             result = []
             for r in op_rows:
                 oid = r[0]
@@ -526,7 +532,8 @@ def get_operator_list(request):
                     "sex": r[4], 
                     "branch": r[5], 
                     "position": r[6],
-                    "tags": r[7].split(',') if r[7] else [],
+                    "avatar_url": r[7],
+                    "tags": r[8].split(',') if r[8] else [], 
                     "states": states_by_op.get(oid, [])
                 })
                 
@@ -844,14 +851,16 @@ def delete_guide_comment(request, guide_id):
         except DatabaseError as e:
             print(f"[Delete Comment Error]: {e}")
             return JsonResponse({"status": "error", "message": "刪除留言失敗，資料庫操作異常"}, status=500)
-# 18.【Read 查詢】查詢特定幹員詳細資料 (包含基礎、數值區間、標籤、檔案、技能、模組)
+
+# 18.【Read 查詢】查詢特定幹員詳細資料 (支援立繪與頭像)
 def get_operator_detail(request, op_id):
     try:
         with connection.cursor() as cursor:
             # ==========================================
-            # 1. 基礎資料 (Operator 基本屬性)
+            # 1. 基礎資料 (Operator 基本屬性 + 頭像 + 立繪)
             # ==========================================
-            sql_basic = "SELECT operator_id, name, rarity, class, sex, branch, position FROM operator WHERE operator_id = %s"
+            # 補上 avatar_url 與 portrait_url，並為 class 加上反引號防呆
+            sql_basic = "SELECT operator_id, name, rarity, `class`, sex, branch, position, avatar_url, portrait_url FROM operator WHERE operator_id = %s"
             cursor.execute(sql_basic, [op_id])
             basic_row = cursor.fetchone()
             
@@ -867,7 +876,9 @@ def get_operator_detail(request, op_id):
                 "class": basic_row[3],
                 "sex": basic_row[4],
                 "branch": basic_row[5],
-                "position": basic_row[6]
+                "position": basic_row[6],
+                "avatar_url": basic_row[7],    
+                "portrait_url": basic_row[8]  
             }
 
             # ==========================================
