@@ -167,7 +167,31 @@
             // 呼叫加入名冊的函數
             addToRoster(opId, opName);
         }
+
+        // 管理員刪除幹員邏輯
+        const deleteBtn = e.target.closest('.btn-delete-op');
+        if (deleteBtn) {
+            const opId = deleteBtn.dataset.id;
+            if (confirm(`警告：確定要永久刪除幹員檔案 (ID: ${opId}) 嗎？`)) {
+                adminDeleteOperator(opId);
+            }
+        }
         });
+    }
+
+    async function adminDeleteOperator(opId) {
+        try {
+            const resp = await fetch(`${API_BASE}/admin/operators/${opId}/delete/`, { method: 'DELETE' });
+            const data = await resp.json();
+            if (data.status === 'success') {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert("刪除失敗: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     function renderList(operators) {
@@ -180,6 +204,7 @@
 
         const user = JSON.parse(localStorage.getItem('prts_user') || 'null');
         const uid = user ? (user.user_id || user.id) : null;
+        const isAdmin = user && user.is_admin;
 
         elements.listContainer.innerHTML = operators.map(op => {
             const id = op.operator_id || op.id || '--';
@@ -187,6 +212,16 @@
             const rarityNum = parseInt(op.rarity) || 1;
             const rarityStr = '★'.repeat(rarityNum);
             
+            // 補齊圖片路徑：優先使用頭像 avatar_url
+            const avatarUrl = op.avatar_url || `/static/images/avatars/${id}.png`;
+
+            // 管理員額外按鈕
+            const adminControls = isAdmin ? `
+                <div class="admin-op-controls" style="margin-top: 10px; display: flex; gap: 5px;">
+                    <button class="btn-delete-op" data-id="${id}" style="background: rgba(211,47,47,0.1); border: 1px solid #d32f2f; color: #d32f2f; font-size: 0.6rem; padding: 2px 5px; cursor: pointer;">DELETE</button>
+                </div>
+            ` : '';
+
             // Get current stats based on elite stage (修正使用 all_stats)
             const states = op.all_stats || op.states || [];
             let currentStats = states.find(s => s.elite_stage == state.eliteStage);
@@ -222,7 +257,7 @@
             return `
                 <div class="operator-row">
                     <div class="col-portrait">
-                       <div class="portrait-box" style="background-image: url('/static/images/operators/${id}.png'); background-size: cover; background-position: top center; border-bottom: 2px solid var(--teal); background-color: #000;">
+                       <div class="portrait-box" style="background-image: url('${avatarUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; border-bottom: 2px solid var(--teal); background-color: #111;">
                          ${!id ? '?' : ''}
                        </div>
                        <div class="rarity-stars">${rarityStr}</div>

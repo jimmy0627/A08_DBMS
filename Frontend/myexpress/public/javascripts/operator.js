@@ -185,23 +185,37 @@ function renderDetail(data) {
   const container = document.querySelector('#detail-container');
   if (!container) return;
 
+  // 補齊圖片路徑：優先使用資料庫欄位，若無則嘗試預設路徑
+  const portraitUrl = op.portrait_url || `/static/images/portraits/${op.id}.png`;
+  const avatarUrl = op.avatar_url || `/static/images/avatars/${op.id}.png`;
+
   container.innerHTML = `
     <div class="operator-profile">
-      <section class="section-portrait section-panel" style="position: relative; height: 500px; overflow: hidden; background: #000;">
-        <div class="portrait-box" style="width: 100%; height: 100%; background-image: url('/static/images/operators/${op.id}.png'); background-size: cover; background-position: top center; opacity: 0.8;"></div>
-        <div class="portrait-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; opacity: 0.2;">
-          <div class="p-text">PERSONNEL FILE</div>
-          <div class="p-sub">ARCHIVE DATA #RI-${op.id}</div>
+      <section class="section-portrait section-panel" style="position: relative; height: 500px; overflow: hidden; background: #000; border: 1px solid var(--border);">
+        <div class="portrait-box" id="portrait-img" style="width: 100%; height: 100%; background-image: url('${portraitUrl}'); background-size: cover; background-position: top center; opacity: 0.9; transition: opacity 0.3s;"></div>
+        <div class="portrait-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; height: 150px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); pointer-events: none;"></div>
+        <div class="portrait-placeholder" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; opacity: 0.1;">
+          <div class="p-text" style="font-size: 5rem; font-weight: 900; letter-spacing: -2px;">PERSONNEL</div>
+          <div class="p-sub" style="font-size: 1.5rem; text-align: right;">RI-ARCHIVE</div>
         </div>
-        <div class="rarity-badge" style="z-index: 2;">${rarityStr}</div>
+        <div class="rarity-badge" style="z-index: 2; position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-left: 4px solid var(--teal); font-size: 1.2rem; filter: drop-shadow(0 0 10px var(--teal));">${rarityStr}</div>
       </section>
 
       <div class="profile-info-grid">
         <section class="section-basic section-panel">
-          <h1 class="op-name" style="font-size: 2.8rem; margin: 0 0 16px; font-weight: 800;">${op.name} <span class="op-id" style="color: var(--teal); font-size: 1rem; margin-left: 12px; font-weight: 500;">// PERSONNEL ID/${op.id}</span></h1>
+          <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
+            <div class="op-avatar" style="width: 72px; height: 72px; border: 2px solid var(--teal); background: #111; padding: 2px; flex-shrink: 0; box-shadow: 0 0 15px rgba(41, 182, 246, 0.2);">
+              <img src="${avatarUrl}" alt="${op.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='/static/images/avatars/default.png'">
+            </div>
+            <div>
+              <h1 class="op-name" style="font-size: 2.8rem; margin: 0; font-weight: 800; line-height: 1;">${op.name}</h1>
+              <div class="op-id" style="color: var(--teal); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.1em; margin-top: 4px;">PERSONNEL ID // RI-${op.id.toString().padStart(4, '0')}</div>
+            </div>
+          </div>
+          
           <div class="basic-tags" style="display: flex; gap: 12px; margin-bottom: 24px;">
-            <span class="tag tag-class" style="background: var(--teal); color: #000; padding: 6px 16px; font-weight: 800; font-size: 0.85rem;">${op.class}</span>
-            <span class="tag tag-branch" style="border: 1px solid var(--border); padding: 6px 16px; font-size: 0.85rem; font-weight: 700;">${op.branch}</span>
+            <span class="tag tag-class" style="background: var(--teal); color: #000; padding: 6px 16px; font-weight: 800; font-size: 0.85rem; clip-path: polygon(0% 0%, 90% 0%, 100% 100%, 0% 100%);">${op.class}</span>
+            <span class="tag tag-branch" style="border: 1px solid var(--border); padding: 6px 16px; font-size: 0.85rem; font-weight: 700; color: #eee;">${op.branch}</span>
             <span class="tag tag-meta" style="color: var(--muted); font-size: 0.85rem; padding-top: 6px; font-weight: 700;">${op.position} // ${op.sex}</span>
           </div>
           <div class="op-tags" style="display: flex; flex-wrap: wrap; gap: 12px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -243,17 +257,19 @@ function renderDetail(data) {
       <section class="section-skills section-panel">
         <h3 style="margin-top: 0; font-size: 0.85rem; color: var(--teal); font-weight: 800; letter-spacing: 0.2em; margin-bottom: 24px;">EQUIPPED SKILLS // 攜帶技能</h3>
         <div class="skills-list" style="display: grid; gap: 16px;">
-          ${op.skills && op.skills.length > 0 ? op.skills.map(s => `
-            <div class="skill-item" style="display: grid; grid-template-columns: 60px 1fr; gap: 20px; background: rgba(255,255,255,0.02); padding: 16px; border: 1px solid rgba(255,255,255,0.05);">
-              <div class="s-icon" style="width: 60px; height: 60px; background: #000; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                ${s.icon_url ? `<img src="${s.icon_url}" alt="${s.name}" style="width: 100%; height: 100%; object-fit: contain;">` : ''}
+          ${op.skills && op.skills.length > 0 ? op.skills.map(s => {
+            const sIcon = s.icon_url || `/static/images/skills/${s.name}.png`;
+            return `
+            <div class="skill-item" style="display: grid; grid-template-columns: 60px 1fr; gap: 20px; background: rgba(255,255,255,0.02); padding: 16px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;">
+              <div class="s-icon" style="width: 60px; height: 60px; background: #000; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 1;">
+                <img src="${sIcon}" alt="${s.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='/static/images/skills/default.png'">
               </div>
-              <div class="s-info">
+              <div class="s-info" style="z-index: 1;">
                 <h4 style="margin: 0 0 8px; color: var(--teal); font-size: 1.1rem; font-weight: 800;">${s.name}</h4>
                 <p style="margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.6;">${s.description || '無詳細描述。'}</p>
               </div>
             </div>
-          `).join('') : '<p class="empty-msg" style="color: var(--muted); font-size: 0.9rem;">查無技能資料。</p>'}
+          `}).join('') : '<p class="empty-msg" style="color: var(--muted); font-size: 0.9rem;">查無技能資料。</p>'}
         </div>
       </section>
 
@@ -265,7 +281,7 @@ function renderDetail(data) {
               <!-- 左欄：識別與條件區 -->
               <div class="module-identity" style="padding: 24px; background: rgba(0,0,0,0.2); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; text-align: center;">
                 <div class="m-icon-wrapper" style="width: 120px; height: 120px; border: 1px solid rgba(255,255,255,0.1); background: #000; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; box-shadow: inset 0 0 20px rgba(41, 182, 246, 0.05);">
-                   ${m.icon_url ? `<img src="${m.icon_url}" alt="${m.type}" style="width: 80%; height: 80%; object-fit: contain;">` : `<span style="font-size: 2rem; font-weight: 900; color: #333;">${m.type}</span>`}
+                   <img src="${m.icon_url || `/static/images/modules/${m.type || 'default'}.png`}" alt="${m.type}" style="width: 80%; height: 80%; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size: 2rem; font-weight: 900; color: #333;\'>${m.type}</span>';">
                 </div>
                 <h4 style="margin: 0 0 16px; color: #FFF; font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em;">TYPE ${m.type}</h4>
                 <div class="m-mission-box" style="width: 100%; text-align: left; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 2px;">

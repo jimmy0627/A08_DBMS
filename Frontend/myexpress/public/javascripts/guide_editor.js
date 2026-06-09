@@ -32,6 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 option.textContent = `${stage.id} - ${stage.name}`;
                 stageSelect.appendChild(option);
             });
+
+            // Auto-select stage if provided in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const preselectedStage = urlParams.get('stage_id');
+            if (preselectedStage) {
+                stageSelect.value = preselectedStage;
+            }
+
             statusText.textContent = 'STATUS: AWAITING INPUT...';
         } else {
             statusText.textContent = 'STATUS: DATABASE ERROR';

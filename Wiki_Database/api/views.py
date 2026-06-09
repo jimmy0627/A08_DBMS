@@ -400,6 +400,10 @@ def login_user(request):
                 cursor.execute(sql_nickname, [db_user_id])
                 profile_record = cursor.fetchone()
 
+                # 檢查是否為管理員
+                cursor.execute("SELECT user_id FROM admin WHERE user_id = %s", [db_user_id])
+                is_admin = cursor.fetchone() is not None
+
                 player_nickname = profile_record[0] if profile_record else "未知博士"
                 
                 return JsonResponse({
@@ -408,7 +412,8 @@ def login_user(request):
                     "user_info": {
                         "user_id": db_user_id,
                         "email": email,
-                        "nickname": player_nickname
+                        "nickname": player_nickname,
+                        "is_admin": is_admin
                     }
                 })
                 
@@ -547,9 +552,9 @@ def get_operator_list(request):
 def get_user_roster(request, user_id):
     try:
         with connection.cursor() as cursor:
-            # 修正：同步 own 表的新欄位，包含目標練度
+            # 修正：同步 own 表的新欄位，包含目標練度與頭像
             sql = """
-                SELECT o.operator_id, op.name, o.current_elite, o.current_level, o.target_elite, o.target_level
+                SELECT o.operator_id, op.name, o.current_elite, o.current_level, o.target_elite, o.target_level, op.avatar_url
                 FROM own o
                 JOIN operator op ON o.operator_id = op.operator_id
                 WHERE o.user_id = %s
@@ -565,7 +570,8 @@ def get_user_roster(request, user_id):
                     "current_elite": r[2],
                     "current_level": r[3],
                     "target_elite": r[4],
-                    "target_level": r[5]
+                    "target_level": r[5],
+                    "avatar_url": r[6]
                 }
                 result.append(roster_data)
                 
@@ -846,6 +852,83 @@ def delete_guide_comment(request, guide_id):
                 sql_delete = "DELETE FROM guide_comment WHERE guide_id = %s AND comment_text = %s"
                 cursor.execute(sql_delete, [guide_id, comment_text])
                 
+
+# ==========================================
+# 管理員專用：CRUD 擴充
+# ==========================================
+
+# 27.【Create】管理員新增幹員
+@csrf_exempt
+def admin_create_operator(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # 基本驗證
+            name = data.get('name')
+            rarity = data.get('rarity')
+            op_class = data.get('class')
+            branch = data.get('branch')
+            position = data.get('position')
+            sex = data.get('sex')
+
+            if not all([name, rarity, op_class, branch, position, sex]):
+                return JsonResponse({"status": "error", "message": "欄位不完整"}, status=400)
+
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO operator (name, rarity, `class`, branch, position, sex, avatar_url, portrait_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(sql, [name, rarity, op_class, branch, position, sex, data.get('avatar_url'), data.get('portrait_url')])
+                return JsonResponse({"status": "success", "message": f"幹員 {name} 已錄入資料庫"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 28.【Delete】管理員刪除幹員
+@csrf_exempt
+def admin_delete_operator(request, op_id):
+    if request.method == 'DELETE':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM operator WHERE operator_id = %s", [op_id])
+                return JsonResponse({"status": "success", "message": "幹員檔案已徹底抹除"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 29.【Create】管理員新增素材
+@csrf_exempt
+def admin_create_material(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name')
+            icon_url = data.get('icon_url')
+            if not name: return JsonResponse({"status": "error", "message": "名稱缺失"}, status=400)
+
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO material (name, icon_url) VALUES (%s, %s)", [name, icon_url])
+                return JsonResponse({"status": "success", "message": f"素材 {name} 已新增"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 30.【Delete】管理員刪除素材
+@csrf_exempt
+def admin_delete_material(request, mat_id):
+    if request.method == 'DELETE':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM material WHERE material_id = %s", [mat_id])
+                return JsonResponse({"status": "success", "message": "素材已從倉庫移除"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 31.【Delete】管理員刪除關卡
+@csrf_exempt
+def admin_delete_stage(request, stage_id):
+    if request.method == 'DELETE':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM stages WHERE stage_id = %s", [stage_id])
+                return JsonResponse({"status": "success", "message": f"作戰區域 {stage_id} 已撤鎖"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
                 return JsonResponse({"status": "success", "message": "該則留言已成功刪除！"})
                 
         except DatabaseError as e:
@@ -1296,10 +1379,35 @@ def global_search(request):
                     "id": r[0],
                     "title": r[1] if r[1] else r[0],
                     "subtitle": f"行動代碼: {r[0]}",
-                    "url": f"/operators.html?stage={r[0]}"
+                    "url": f"/stage_detail.html?id={r[0]}"
                 })
 
         return JsonResponse({"status": "success", "results": results}, json_dumps_params={'ensure_ascii': False})
     except DatabaseError as e:
         print(f"[Global Search Error]: {e}")
         return JsonResponse({"status": "error", "message": "搜尋服務暫時不可用"}, status=500)
+
+# 26.【Read 查詢】查詢單一關卡詳細資料
+def get_stage_detail(request, stage_id):
+    try:
+        with connection.cursor() as cursor:
+            # 獲取關卡基本資料
+            cursor.execute("SELECT stage_id, name, energy_cost, map_url, description FROM stages WHERE stage_id = %s", [stage_id])
+            row = cursor.fetchone()
+            
+            if not row:
+                return JsonResponse({"status": "error", "message": "找不到該關卡資料"}, status=404)
+                
+            stage_data = {
+                "id": row[0],
+                "name": row[1],
+                "cost": row[2],
+                "map_url": row[3],
+                "description": row[4]
+            }
+            
+            return JsonResponse({"status": "success", "data": stage_data}, json_dumps_params={'ensure_ascii': False})
+            
+    except DatabaseError as e:
+        print(f"[DB Error in get_stage_detail]: {e}")
+        return JsonResponse({"status": "error", "message": "讀取關卡詳情失敗"}, status=500)

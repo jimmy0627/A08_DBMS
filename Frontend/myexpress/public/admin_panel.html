@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Terminal // PRTS Database</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="/javascripts/auth.js"></script>
+    <script defer src="/javascripts/admin_panel.js"></script>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a href="/" class="logo">RHODES ISLAND ADMIN</a>
+            <div class="header-actions">
+                <!-- Auth will handle this -->
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <div class="section-title" style="margin-bottom: 24px; color: var(--red); font-size: 1.5rem; font-weight: 800;">
+                // SYSTEM_ADMIN_TERMINAL // 高階管理終端
+            </div>
+
+            <div class="admin-grid">
+                <!-- Add Operator Form -->
+                <section class="panel admin-form-section">
+                    <div class="panel-title">[ 新增幹員檔案 // CREATE_OPERATOR ]</div>
+                    <form id="form-add-operator" class="admin-form">
+                        <div class="form-group">
+                            <label>幹員代號 (Name)</label>
+                            <input type="text" name="name" placeholder="例如: 能天使" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>稀有度 (Rarity)</label>
+                                <select name="rarity">
+                                    <option value="6">6星</option>
+                                    <option value="5">5星</option>
+                                    <option value="4">4星</option>
+                                    <option value="3">3星</option>
+                                    <option value="2">2星</option>
+                                    <option value="1">1星</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>職業 (Class)</label>
+                                <select name="class">
+                                    <option value="先鋒">先鋒</option>
+                                    <option value="近衛">近衛</option>
+                                    <option value="重裝">重裝</option>
+                                    <option value="狙擊">狙擊</option>
+                                    <option value="術師">術師</option>
+                                    <option value="輔助">輔助</option>
+                                    <option value="特種">特種</option>
+                                    <option value="醫療">醫療</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>分支 (Branch)</label>
+                                <input type="text" name="branch" placeholder="例如: 速射手" required>
+                            </div>
+                            <div class="form-group">
+                                <label>位置 (Position)</label>
+                                <select name="position">
+                                    <option value="近戰位">近戰位</option>
+                                    <option value="遠程位">遠程位</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>性別 (Sex)</label>
+                            <select name="sex">
+                                <option value="女">女</option>
+                                <option value="男">男</option>
+                                <option value="無">無</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>頭像 URL (Avatar)</label>
+                            <input type="text" name="avatar_url" placeholder="/static/images/avatars/name.png">
+                        </div>
+                        <div class="form-group">
+                            <label>立繪 URL (Portrait)</label>
+                            <input type="text" name="portrait_url" placeholder="/static/images/portraits/name.png">
+                        </div>
+                        <button type="submit" class="btn btn-teal">錄入人事檔案</button>
+                    </form>
+                </section>
+
+                <div class="admin-sidebar">
+                    <!-- Add Material Form -->
+                    <section class="panel admin-form-section">
+                        <div class="panel-title">[ 新增素材 // ADD_MATERIAL ]</div>
+                        <form id="form-add-material" class="admin-form">
+                            <div class="form-group">
+                                <label>素材名稱</label>
+                                <input type="text" name="name" placeholder="例如: D32鋼" required>
+                            </div>
+                            <div class="form-group">
+                                <label>圖片 URL</label>
+                                <input type="text" name="icon_url" placeholder="/static/images/materials/name.png">
+                            </div>
+                            <button type="submit" class="btn btn-teal">新增素材數據</button>
+                        </form>
+                    </section>
+
+                    <!-- Add Stage Form -->
+                    <section class="panel admin-form-section" style="margin-top: 24px;">
+                        <div class="panel-title">[ 建立作戰區域 // CREATE_STAGE ]</div>
+                        <form id="form-add-stage" class="admin-form">
+                            <div class="form-group">
+                                <label>作戰編號 (ID)</label>
+                                <input type="text" name="stage_id" placeholder="例如: 7-15" required>
+                            </div>
+                            <div class="form-group">
+                                <label>作戰名稱</label>
+                                <input type="text" name="name" placeholder="例如: 感染者的防禦線" required>
+                            </div>
+                            <div class="form-group">
+                                <label>理智消耗</label>
+                                <input type="number" name="energy_cost" value="18" required>
+                            </div>
+                            <button type="submit" class="btn btn-teal">配置作戰區域</button>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>PRTS // Administrative Interface v1.0</p>
+        </footer>
+    </div>
+
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+        .admin-form {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        input, select {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .btn-teal {
+            background: var(--teal);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+        .btn-teal:hover {
+            filter: brightness(1.2);
+        }
+        @media (max-width: 900px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</body>
+</html>

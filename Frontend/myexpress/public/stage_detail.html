@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stage Details // PRTS Database</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="/javascripts/auth.js"></script>
+    <script defer src="/javascripts/global_search.js"></script>
+    <script defer src="/javascripts/stage_detail.js"></script>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <a href="/" class="logo">RHODES ISLAND DATABASE</a>
+            <div class="header-search">
+                <input type="text" placeholder="搜尋幹員、素材、關卡...">
+            </div>
+            <div class="header-actions">
+                <!-- Auth will handle this -->
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <div id="stage-detail-container">
+                <div class="loading-state" style="padding: 100px; text-align: center; color: var(--muted); font-size: 1.2rem;">
+                    [ ACCESSING_STAGE_DATA... ]
+                </div>
+            </div>
+
+            <!-- Drops Section -->
+            <section class="drops-section panel" style="margin-top: 24px;">
+                <div class="section-title" style="padding: 16px 24px; border-bottom: 1px solid var(--border);">
+                    掉落物品清單 // DROP_LIST
+                </div>
+                <div id="drops-grid" class="drops-grid" style="padding: 24px;">
+                    <div style="color: var(--muted);">正在加載掉落數據...</div>
+                </div>
+            </section>
+
+            <!-- Guides Section -->
+            <section class="guides-section panel" style="margin-top: 24px;">
+                <div class="section-title" style="padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <span>相關戰術指南 // TACTICAL_GUIDES</span>
+                    <a id="add-guide-link" href="#" class="view-all-link" style="font-size: 0.8rem;">發布新的攻略 ›</a>
+                </div>
+                <div id="guides-list" class="guides-list" style="padding: 24px;">
+                    <div style="color: var(--muted);">正在檢索相關指南...</div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>PRTS // Rhodes Island Database Interface</p>
+        </footer>
+    </div>
+
+    <style>
+        .stage-header-panel {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+        }
+        .stage-map-box {
+            position: relative;
+            background: #000;
+            border: 1px solid var(--border);
+            height: 400px;
+            overflow: hidden;
+        }
+        .stage-map-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+        }
+        .stage-title-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+        }
+        .stage-code-tag {
+            display: inline-block;
+            background: var(--teal);
+            color: #000;
+            padding: 2px 8px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        .stage-name-text {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+        .stage-info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .info-card {
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+        }
+        .info-label {
+            color: var(--muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .stage-description {
+            color: var(--text);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            border-left: 3px solid var(--teal);
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+        .drops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        .drop-item-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: center;
+            transition: var(--transition);
+        }
+        .drop-item-card:hover {
+            border-color: var(--teal);
+            background: rgba(41, 182, 246, 0.05);
+        }
+        .drop-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 8px;
+        }
+        .drop-name {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .drop-rate-tag {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            background: rgba(255,255,255,0.1);
+            color: var(--teal);
+        }
+        .guide-item {
+            display: block;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .guide-item:last-child {
+            border-bottom: none;
+        }
+        .guide-item:hover {
+            background: rgba(255,255,255,0.03);
+            padding-left: 24px;
+        }
+        .guide-item-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .guide-item-meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 900px) {
+            .stage-header-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -67,4 +67,14 @@ urlpatterns = [
 
     # 全域搜尋系統
     path('search/', views.global_search),
+
+    # 關卡詳細資料
+    path('stages/<str:stage_id>/detail/', views.get_stage_detail),
+
+    # 管理員專用介面
+    path('admin/operators/create/', views.admin_create_operator),
+    path('admin/operators/<int:op_id>/delete/', views.admin_delete_operator),
+    path('admin/materials/create/', views.admin_create_material),
+    path('admin/materials/<int:mat_id>/delete/', views.admin_delete_material),
+    path('admin/stages/<str:stage_id>/delete/', views.admin_delete_stage),
 ]

@@ -60,9 +60,17 @@ async function loadGuideDetail(id, currentUserId) {
             // 渲染留言
             renderComments(data.comments);
 
-            // 權限檢查：只有作者本人可以看到刪除按鈕
-            if (currentUserId && parseInt(currentUserId) === data.author_id) {
+            // 權限檢查：作者本人 OR 管理員 可以看到刪除按鈕
+            const user = auth.getUser();
+            const isAdmin = user && user.is_admin;
+            if (isAdmin || (currentUserId && parseInt(currentUserId) === data.author_id)) {
                 document.getElementById('admin-zone').style.display = 'block';
+                if (isAdmin && (currentUserId && parseInt(currentUserId) !== data.author_id)) {
+                    const btn = document.getElementById('delete-guide');
+                    btn.textContent = "[ ADMIN FORCE DELETE // 管理員強制註銷 ]";
+                    btn.style.color = "var(--red)";
+                    btn.style.borderColor = "var(--red)";
+                }
             }
 
         } else {

@@ -52,9 +52,10 @@ async function loadProfileData(userId) {
                     // Update Roster Grid
                     const unit = document.createElement('div');
                     unit.className = 'roster-unit';
+                    const avatarUrl = item.avatar_url || `/static/images/avatars/${item.operator_id}.png`;
                     unit.innerHTML = `
-                        <div class="unit-thumb" style="background-color: #333">
-                            <span>${item.name[0]}</span>
+                        <div class="unit-thumb" style="background-color: #111; border:1px solid #444; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                            <img src="${avatarUrl}" alt="${item.name}" style="width:100%; height:100%; object-fit:contain;" onerror="this.parentElement.innerHTML='<span>${item.name[0]}</span>'">
                             <button class="unit-delete" onclick="deleteFromRoster('${item.operator_id}', '${item.name}')" title="註銷檔案">×</button>
                         </div>
                         <div class="unit-level">E${item.current_elite} ${item.current_level}</div>

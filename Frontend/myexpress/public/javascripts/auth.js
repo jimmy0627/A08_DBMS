@@ -94,11 +94,15 @@
 
             const user = this.getUser();
             if (user) {
+                const adminLink = user.is_admin ? `<span onclick="location.href='/admin_panel.html'" style="cursor:pointer; font-size:0.6rem; color:#f0c14b; text-decoration:underline;">[ADMIN PANEL]</span>` : '';
                 container.innerHTML = `
                     <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.05); padding:5px 12px; border:1px solid #333;">
                         <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <span style="font-size:0.6rem; color:#29b6f6; font-weight:800; letter-spacing:1px;">ACCESS GRANTED</span>
-                            <span onclick="location.href='/profile.html'" style="cursor:pointer; font-weight:700; color:#fff;">${user.nickname}</span>
+                            <span style="font-size:0.6rem; color:#29b6f6; font-weight:800; letter-spacing:1px;">ACCESS GRANTED ${user.is_admin ? ' (ADMIN)' : ''}</span>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                ${adminLink}
+                                <span onclick="location.href='/profile.html'" style="cursor:pointer; font-weight:700; color:#fff;">${user.nickname}</span>
+                            </div>
                         </div>
                         <button onclick="auth.logout()" style="background:transparent; border:1px solid #d32f2f; color:#d32f2f; padding:4px 8px; font-size:0.7rem; font-weight:800; cursor:pointer;">LOGOUT</button>
                     </div>
