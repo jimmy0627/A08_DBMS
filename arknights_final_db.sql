@@ -122,7 +122,7 @@ CREATE TABLE `material` (
 
 LOCK TABLES `material` WRITE;
 /*!40000 ALTER TABLE `material` DISABLE KEYS */;
-INSERT INTO `material` VALUES (1,'D32鋼','/static/images/materials/d32_steel.png'),(2,'聚合劑','/static/images/materials/polymerization_preparation.png'),(3,'雙極納米片',NULL),(4,'晶體電子單元',NULL),(5,'燒結核凝晶',NULL),(6,'轉質鹽聚塊',NULL),(7,'晶耀磁環',NULL),(8,'提純源岩',NULL),(9,'糖聚塊','/static/images/materials/sugar_lump.png'),(10,'聚酸酯塊',NULL),(11,'異鐵塊',NULL),(12,'酮陣列',NULL),(13,'改量裝置','/static/images/materials/optimized_device.png'),(14,'白馬醇','/static/images/materials/white_horse_kohl.png'),(15,'三水錳礦','/static/images/materials/rma70_24.png'),(16,'五水研磨石',NULL),(17,'RMA70-24',NULL),(18,'聚合凝膠','/static/images/materials/polymerized_gel.png'),(19,'熾合金塊',NULL),(20,'晶體電路',NULL),(21,'精煉溶劑',NULL),(22,'切削原液',NULL),(23,'固化纖維板',NULL),(24,'環己沙酮',NULL),(25,'固源岩組','/static/images/materials/orirock_cube.png'),(26,'糖組','/static/images/materials/sugar_pack.png'),(27,'聚酸酯組','/static/images/materials/polyester_pack.png'),(28,'異鐵組','/static/images/materials/oriron_cluster.png'),(29,'酮凝集組','/static/images/materials/aketon.png'),(30,'全新裝置','/static/images/materials/brand_new_device.png'),(31,'扭轉醇','/static/images/materials/loxic_kohl.png'),(32,'輕錳礦','/static/images/materials/manganese_ore.png'),(33,'研磨石','/static/images/materials/grindstone.png'),(34,'RMA70-12',NULL),(35,'凝膠',NULL),(36,'熾合金',NULL),(37,'晶體元件',NULL),(38,'半自然溶劑',NULL),(39,'化合切削液',NULL),(40,'褐素纖維',NULL),(41,'轉質鹽組',NULL),(42,'固源岩','/static/images/materials/orirock.png'),(43,'糖','/static/images/materials/sugar.png'),(44,'聚酸酯','/static/images/materials/polyester.png'),(45,'異鐵','/static/images/materials/oriron.png'),(46,'酮凝集','/static/images/materials/polyketon.png'),(47,'裝置','/static/images/materials/device.png'),(48,'源岩','/static/images/materials/rock.png'),(49,'代糖','/static/images/materials/substitute.png'),(50,'酯原料','/static/images/materials/ester.png'),(51,'異鐵碎片','/static/images/materials/oriron_shard.png'),(52,'雙酮','/static/images/materials/diketon.png'),(53,'破損裝置','/static/images/materials/damaged_device.png'),(54,'技巧概要·卷1',NULL),(55,'技巧概要·卷2',NULL),(56,'技巧概要·卷3',NULL);
+INSERT INTO `material` VALUES (1,'D32鋼','/static/images/materials/d32_steel.png'),(2,'聚合劑','/static/images/materials/polymerization_preparation.png'),(3,'雙極納米片','/static/images/materials/bipolar_nanoflake.png'),(4,'晶體電子單元',NULL),(5,'燒結核凝晶',NULL),(6,'轉質鹽聚塊',NULL),(7,'晶耀磁環',NULL),(8,'提純源岩',NULL),(9,'糖聚塊','/static/images/materials/sugar_lump.png'),(10,'聚酸酯塊',NULL),(11,'異鐵塊',NULL),(12,'酮陣列',NULL),(13,'改量裝置','/static/images/materials/改良裝置.png'),(14,'白馬醇','/static/images/materials/white_horse_kohl.png'),(15,'三水錳礦','/static/images/materials/三水錳礦.png'),(16,'五水研磨石',NULL),(17,'RMA70-24',NULL),(18,'聚合凝膠','/static/images/materials/聚合凝膠.png'),(19,'熾合金塊',NULL),(20,'晶體電路',NULL),(21,'精煉溶劑',NULL),(22,'切削原液',NULL),(23,'固化纖維板',NULL),(24,'環己沙酮',NULL),(25,'固源岩組','/static/images/materials/orirock_cube.png'),(26,'糖組','/static/images/materials/sugar_pack.png'),(27,'聚酸酯組','/static/images/materials/polyester_pack.png'),(28,'異鐵組','/static/images/materials/異鐵組.png'),(29,'酮凝集組','/static/images/materials/aketon.png'),(30,'全新裝置','/static/images/materials/全新裝置.png'),(31,'扭轉醇','/static/images/materials/loxic_kohl.png'),(32,'輕錳礦','/static/images/materials/manganese_ore.png'),(33,'研磨石','/static/images/materials/grindstone.png'),(34,'RMA70-12',NULL),(35,'凝膠',NULL),(36,'熾合金',NULL),(37,'晶體元件',NULL),(38,'半自然溶劑',NULL),(39,'化合切削液',NULL),(40,'褐素纖維',NULL),(41,'轉質鹽組',NULL),(42,'固源岩','/static/images/materials/orirock.png'),(43,'糖','/static/images/materials/sugar.png'),(44,'聚酸酯','/static/images/materials/聚酸酯.png'),(45,'異鐵','/static/images/materials/oriron.png'),(46,'酮凝集','/static/images/materials/酮凝集.png'),(47,'裝置','/static/images/materials/device.png'),(48,'源岩','/static/images/materials/rock.png'),(49,'代糖','/static/images/materials/substitute.png'),(50,'酯原料','/static/images/materials/ester.png'),(51,'異鐵碎片','/static/images/materials/oriron_shard.png'),(52,'雙酮','/static/images/materials/diketon.png'),(53,'破損裝置','/static/images/materials/damaged_device.png'),(54,'技巧概要·卷1',NULL),(55,'技巧概要·卷2',NULL),(56,'技巧概要·卷3',NULL);
 /*!40000 ALTER TABLE `material` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -371,7 +371,7 @@ CREATE TABLE `own` (
 
 LOCK TABLES `own` WRITE;
 /*!40000 ALTER TABLE `own` DISABLE KEYS */;
-INSERT INTO `own` VALUES (1,4,2,90,2,90),(1,17,2,60,2,90);
+INSERT INTO `own` VALUES (1,4,2,90,2,90),(1,17,2,60,2,90),(4,1,0,1,2,90);
 /*!40000 ALTER TABLE `own` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -397,7 +397,7 @@ CREATE TABLE `reg_user` (
 
 LOCK TABLES `reg_user` WRITE;
 /*!40000 ALTER TABLE `reg_user` DISABLE KEYS */;
-INSERT INTO `reg_user` VALUES (2,'Amiya_002'),(1,'Doctor_001'),(3,'凱爾希');
+INSERT INTO `reg_user` VALUES (2,'Amiya_002'),(1,'Doctor_001'),(4,'toby'),(3,'凱爾希');
 /*!40000 ALTER TABLE `reg_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -527,7 +527,7 @@ CREATE TABLE `user` (
   `password_hash` varchar(255) NOT NULL COMMENT '登入密碼',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -536,7 +536,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'doctor@rhodesisland.com','default_pwd'),(2,'amiya@rhodesisland.com','default_pwd'),(3,'kaltsit@rhodesisland.com','ex_wife_password');
+INSERT INTO `user` VALUES (1,'doctor@rhodesisland.com','default_pwd'),(2,'amiya@rhodesisland.com','default_pwd'),(3,'kaltsit@rhodesisland.com','ex_wife_password'),(4,'D1385388@o365.fcu.edu.tw','pbkdf2_sha256$1000000$4aALmf8mRIesJHYWLvQfuN$V/QTwIU8yqRQwz32Zi8hST8zD7hp0McbpxBebKqxwZE=');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -549,4 +549,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-09 15:05:00
+-- Dump completed on 2026-06-09 23:41:42
