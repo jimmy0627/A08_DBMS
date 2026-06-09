@@ -11,7 +11,7 @@
 <body>
     <div class="page-shell">
         <header class="topbar">
-            <a href="/" class="logo">RHODES ISLAND ADMIN</a>
+            <div class="logo"><a href="/">RHODES ISLAND ADMIN</a></div>
             <div class="header-actions">
                 <!-- Auth will handle this -->
             </div>
@@ -23,7 +23,23 @@
             </div>
 
             <div class="admin-grid">
-                <!-- Add Operator Form -->
+                <!-- Data Entry Dashboard -->
+                <section class="panel" style="grid-column: span 2; border-bottom: 4px solid var(--teal);">
+                    <div class="panel-title">[ 檔案錄入系統 // DOSSIER_SYSTEM ]</div>
+                    <div style="padding: 20px; display: flex; gap: 20px; align-items: center;">
+                        <div style="flex: 1;">
+                            <h3 style="color: var(--teal); margin-bottom: 10px;">幹員檔案全方位錄入終端</h3>
+                            <p style="color: #888; font-size: 0.9rem;">
+                                使用「分頁導向」的高級錄入模式，支持一次性建立幹員的基本資料、數值、技能、模組與素材消耗（涉及 9 個資料表）。
+                            </p>
+                        </div>
+                        <a href="/operator_admin.html" class="btn btn-teal" style="padding: 15px 30px; font-weight: bold; letter-spacing: 1px;">
+                            啟動錄入導引 (WIZARD_START)
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Add Operator Form (Legacy Single-Table) -->
                 <section class="panel admin-form-section">
                     <div class="panel-title">[ 新增幹員檔案 // CREATE_OPERATOR ]</div>
                     <form id="form-add-operator" class="admin-form">

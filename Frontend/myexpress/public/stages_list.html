@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stages List // Rhodes Island Database</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="/javascripts/auth.js"></script>
+  <style>
+    .stage-row {
+      display: flex;
+      align-items: center;
+      background: #111;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      gap: 0;
+      transition: border-color 0.2s;
+      overflow: hidden;
+    }
+    .stage-row:hover {
+      border-color: var(--teal);
+    }
+    .stage-thumb {
+      width: 140px;
+      height: 70px;
+      background-size: cover;
+      background-position: center;
+      border-right: 2px solid var(--teal);
+      filter: grayscale(0.2);
+    }
+    .stage-info {
+        flex: 1;
+        padding: 0 24px;
+    }
+    .stage-id {
+      color: var(--teal);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+    }
+    .stage-name {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    .stage-cost {
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0 30px;
+      border-left: 1px solid var(--border);
+      text-align: right;
+    }
+    .cost-value {
+      display: block;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+    .btn-view {
+      background: transparent;
+      border: none;
+      border-left: 1px solid var(--border);
+      color: var(--teal);
+      padding: 0 30px;
+      height: 70px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+    }
+    .btn-view:hover {
+      background: rgba(41, 182, 246, 0.1);
+    }
+    .loading-state {
+      padding: 60px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo"><a href="/">RHODES ISLAND DATABASE</a></div>
+      <div class="header-actions">
+        <!-- Auth will handle this -->
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="db-header" style="margin-bottom: 30px;">
+        <div class="title-group">
+          <h1>作戰資料庫</h1>
+          <p class="subtitle">STAGES // 關卡詳細介紹</p>
+          <p style="margin-top: 10px; color: var(--muted); font-size: 0.85rem;">「獲取各區域作戰目標、掉落物資與能源消耗數據。」</p>
+        </div>
+      </div>
+
+      <div id="stages-list-container">
+        <div class="loading-state">[ FETCHING DATA // 正在同步數據 ]</div>
+      </div>
+    </main>
+  </div>
+  <script src="/javascripts/stages_list.js"></script>
+</body>
+</html>

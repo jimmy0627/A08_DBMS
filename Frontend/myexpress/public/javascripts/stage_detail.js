@@ -57,7 +57,7 @@
                 container.innerHTML = `
                     <div class="stage-header-panel">
                         <section class="stage-map-box">
-                            <img src="${mapUrl}" class="stage-map-img" alt="${stage.name}" onerror="this.src='/static/images/maps/default_map.png'">
+                            <img src="${mapUrl}" class="stage-map-img" alt="${stage.name}" onerror="this.onerror=null; this.src='/static/images/maps/default_map.png'">
                             <div class="stage-title-overlay">
                                 <div class="stage-code-tag">${stage.id}</div>
                                 <h1 class="stage-name-text">${stage.name || stage.id}</h1>
@@ -96,7 +96,7 @@
                     return `
                         <div class="drop-item-card">
                             <div class="drop-icon">
-                                <img src="${icon}" alt="${drop.material}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='/static/images/materials/placeholder.png'">
+                                <img src="${icon}" alt="${drop.material}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='/static/images/materials/placeholder.png'">
                             </div>
                             <div class="drop-name">${drop.material}</div>
                             <span class="drop-rate-tag">${drop.drop_rate}</span>

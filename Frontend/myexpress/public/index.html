@@ -34,9 +34,9 @@
           </div>
         </section>
 
-        <section class="event-section panel" id="event-section">
+        <section class="event-section panel" id="event-section" style="border-bottom: 4px solid var(--teal);">
           <div class="loading-state" style="padding: 40px; text-align: center; color: var(--muted); font-size: 0.8rem; font-weight: 800;">
-            [ ACCESSING_EVENT_DATA ]
+            [ ACCESSING_DATABASE_STATS ]
           </div>
         </section>
       </div>
@@ -85,9 +85,9 @@
             </a>
           </nav>
           
-          <div class="system-status" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
-            <p style="font-size: 0.7rem; color: var(--muted); margin: 0;">SYSTEM STATUS: <span style="color: var(--teal);">ONLINE</span></p>
-            <p style="font-size: 0.7rem; color: var(--muted); margin: 4px 0 0;">CONNECTION: <span style="color: var(--teal);">STABLE</span></p>
+          <div class="system-status" id="connection-status" style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
+            <p style="font-size: 0.7rem; color: var(--muted); margin: 0;">SYSTEM STATUS: <span class="status-text" style="color: var(--teal);">ONLINE</span></p>
+            <p style="font-size: 0.7rem; color: var(--muted); margin: 4px 0 0;">CONNECTION: <span class="conn-text" style="color: var(--teal);">STABLE</span></p>
           </div>
         </section>
       </div>

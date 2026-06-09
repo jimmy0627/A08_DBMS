@@ -205,11 +205,17 @@ function renderDetail(data) {
         <section class="section-basic section-panel">
           <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 16px;">
             <div class="op-avatar" style="width: 72px; height: 72px; border: 2px solid var(--teal); background: #111; padding: 2px; flex-shrink: 0; box-shadow: 0 0 15px rgba(41, 182, 246, 0.2);">
-              <img src="${avatarUrl}" alt="${op.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='/static/images/avatars/default.png'">
+              <img src="${avatarUrl}" alt="${op.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='/static/images/avatars/default.png'">
             </div>
             <div>
               <h1 class="op-name" style="font-size: 2.8rem; margin: 0; font-weight: 800; line-height: 1;">${op.name}</h1>
               <div class="op-id" style="color: var(--teal); font-size: 0.9rem; font-weight: 500; letter-spacing: 0.1em; margin-top: 4px;">PERSONNEL ID // RI-${op.id.toString().padStart(4, '0')}</div>
+            </div>
+            <div class="op-actions" style="margin-left: auto; display: flex; gap: 10px;">
+              ${(window.auth && window.auth.getUser() && window.auth.getUser().is_admin) ? `
+                <button class="btn btn-red" onclick="adminDeleteOperator(${op.id})" style="padding: 8px 16px; font-weight: 800; border: 1px solid var(--red); background: rgba(211, 47, 47, 0.1); color: var(--red);">[ 抹除資料 ]</button>
+              ` : ''}
+              <button class="btn btn-teal" onclick="addToRoster(${op.id})" style="padding: 8px 24px; font-weight: 800; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);">＋ 加入持有名單</button>
             </div>
           </div>
           
@@ -262,7 +268,7 @@ function renderDetail(data) {
             return `
             <div class="skill-item" style="display: grid; grid-template-columns: 60px 1fr; gap: 20px; background: rgba(255,255,255,0.02); padding: 16px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden;">
               <div class="s-icon" style="width: 60px; height: 60px; background: #000; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 1;">
-                <img src="${sIcon}" alt="${s.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.src='/static/images/skills/default.png'">
+                <img src="${sIcon}" alt="${s.name}" style="width: 100%; height: 100%; object-fit: contain;" onerror="this.onerror=null; this.src='/static/images/skills/default.png'">
               </div>
               <div class="s-info" style="z-index: 1;">
                 <h4 style="margin: 0 0 8px; color: var(--teal); font-size: 1.1rem; font-weight: 800;">${s.name}</h4>
@@ -397,6 +403,60 @@ function validateAndRefreshLevel() {
 window.changeLevel = changeLevel;
 window.validateAndRefreshLevel = validateAndRefreshLevel;
 window.updateLevelOptions = updateLevelOptions;
+
+async function addToRoster(opId) {
+    const user = window.auth.getUser();
+    if (!user) {
+        alert("請先登入以使用此功能");
+        window.location.href = '/login.html';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/operators/roster/add/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: user.uid || user.user_id, // 兼容不同欄位名
+                operator_id: opId
+            })
+        });
+
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert("成功將幹員加入您的資歷檔案庫！");
+        } else {
+            alert("操作失敗: " + data.message);
+        }
+    } catch (err) {
+        console.error("Roster error:", err);
+        alert("連線伺服器時發生錯誤");
+    }
+}
+
+window.addToRoster = addToRoster;
+
+async function adminDeleteOperator(opId) {
+    if (!confirm("[ WARNING: 此操作將永久抹除幹員檔案，是否執行？ ]")) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/operators/${opId}/delete/`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert("檔案已徹底抹除");
+            window.location.href = '/operators.html';
+        } else {
+            alert("操作失敗: " + data.message);
+        }
+    } catch (err) {
+        console.error("Delete error:", err);
+        alert("連線伺服器時發生錯誤");
+    }
+}
+
+window.adminDeleteOperator = adminDeleteOperator;
 
 async function init() {
   const id = getOperatorIdFromUrl();

@@ -1,6 +1,7 @@
-﻿from django.db import connection, DatabaseError
+﻿from django.db import connection, DatabaseError, transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password, check_password
 import json
 
 # 1.【Read 查詢】查詢所有關卡清單 (對應 GET 請求)
@@ -15,8 +16,10 @@ def get_stages(request):
             for r in rows:
                 result.append({
                     "id": r[0], 
+                    "stage_id": r[0],  # Added
                     "name": r[1], 
                     "cost": r[2],
+                    "energy_cost": r[2], # Added
                     "map_url": r[3],
                     "description": r[4]  
                 })
@@ -351,8 +354,11 @@ def register_user(request):
                 if existing_user:
                     return JsonResponse({"status": "error", "message": "該 Email 已被註冊"}, status=400)
 
+                # 使用 Django 的 make_password 對密碼進行 Hash
+                password_hash = make_password(password)
+                
                 sql_parent = "INSERT INTO user (email, password_hash) VALUES (%s, %s)"
-                cursor.execute(sql_parent, [email, password])
+                cursor.execute(sql_parent, [email, password_hash])
 
                 new_user_id = cursor.lastrowid
 
@@ -393,7 +399,8 @@ def login_user(request):
                 db_user_id = user_record[0]
                 db_password_hash = user_record[1]
 
-                if password != db_password_hash:
+                # 使用 Django 的 check_password 驗證密碼
+                if not check_password(password, db_password_hash):
                     return JsonResponse({"status": "error", "message": "帳號或密碼錯誤"}, status=400)
 
                 sql_nickname = "SELECT nickname FROM reg_user WHERE user_id = %s"
@@ -646,6 +653,60 @@ def delete_from_roster(request, user_id, op_id):
             print(f"[Delete Roster Error]: {e}")
             return JsonResponse({"status": "error", "message": "刪除失敗，資料庫操作異常"}, status=500)
 
+# ==========================================
+# 任務一相關 API
+# ==========================================
+
+# 健康檢查 API
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
+# 系統狀態統計 API
+def get_system_stats(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM operator")
+            total_operators = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM material")
+            total_materials = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM guides")
+            total_guides = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM stages")
+            total_stages = cursor.fetchone()[0]
+            
+            return JsonResponse({
+                "status": "success",
+                "data": {
+                    "total_operators": total_operators,
+                    "total_materials": total_materials,
+                    "total_guides": total_guides,
+                    "total_stages": total_stages
+                }
+            }, json_dumps_params={'ensure_ascii': False})
+    except DatabaseError as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+# 管理員強制刪除留言 API
+@csrf_exempt
+def admin_delete_comment(request):
+    if request.method == 'DELETE':
+        try:
+            data = json.loads(request.body)
+            guide_id = data.get('guide_id')
+            comment_text = data.get('comment_text')
+            
+            if not guide_id or not comment_text:
+                return JsonResponse({"status": "error", "message": "缺少 guide_id 或 comment_text"}, status=400)
+                
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM guide_comment WHERE guide_id = %s AND comment_text = %s", [guide_id, comment_text])
+                return JsonResponse({"status": "success", "message": "通訊紀錄已抹除"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 # 17.【Read 查詢】獲取特定用戶發布的攻略清單
 def get_user_guides(request, user_id):
     try:
@@ -675,6 +736,35 @@ def get_user_guides(request, user_id):
     except DatabaseError as e:
         print(f"[DB Error]: {e}")
         return JsonResponse({"status": "error", "message": "無法讀取攻略紀錄"}, status=500)
+
+# 17.5【Read 查詢】獲取全域攻略列表清單 (所有玩家)
+def list_guides(request):
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+                SELECT g.guide_id, g.stage_id, s.name as stage_name, g.title, u.nickname as author, g.created_at
+                FROM guides g
+                JOIN reg_user u ON g.user_id = u.user_id
+                JOIN stages s ON g.stage_id = s.stage_id
+                ORDER BY g.created_at DESC
+            """
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+            
+            result = []
+            for r in rows:
+                result.append({
+                    "guide_id": r[0],
+                    "stage_id": r[1],
+                    "stage_name": r[2],
+                    "title": r[3],
+                    "author": r[4],
+                    "created_at": str(r[5]) if r[5] else None
+                })
+            return JsonResponse({"status": "success", "data": result}, json_dumps_params={'ensure_ascii': False})
+    except DatabaseError as e:
+        print(f"[DB Error in list_guides]: {e}")
+        return JsonResponse({"status": "error", "message": "無法讀取全域攻略清單"}, status=500)
 
 # 18.【Create 新增】針對特定攻略發表留言 (對應 POST 請求))
 @csrf_exempt
@@ -852,6 +942,12 @@ def delete_guide_comment(request, guide_id):
                 sql_delete = "DELETE FROM guide_comment WHERE guide_id = %s AND comment_text = %s"
                 cursor.execute(sql_delete, [guide_id, comment_text])
                 
+                return JsonResponse({"status": "success", "message": "留言已成功刪除"})
+                
+        except DatabaseError as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "不支援此連線方法"}, status=405)
 
 # ==========================================
 # 管理員專用：CRUD 擴充
@@ -929,11 +1025,6 @@ def admin_delete_stage(request, stage_id):
                 return JsonResponse({"status": "success", "message": f"作戰區域 {stage_id} 已撤鎖"})
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
-                return JsonResponse({"status": "success", "message": "該則留言已成功刪除！"})
-                
-        except DatabaseError as e:
-            print(f"[Delete Comment Error]: {e}")
-            return JsonResponse({"status": "error", "message": "刪除留言失敗，資料庫操作異常"}, status=500)
 
 # 18.【Read 查詢】查詢特定幹員詳細資料 (支援立繪與頭像)
 def get_operator_detail(request, op_id):
@@ -1411,3 +1502,81 @@ def get_stage_detail(request, stage_id):
     except DatabaseError as e:
         print(f"[DB Error in get_stage_detail]: {e}")
         return JsonResponse({"status": "error", "message": "讀取關卡詳情失敗"}, status=500)
+
+# 27.【Admin 錄入】全功能幹員檔案錄入 (事務控制)
+@csrf_exempt
+def create_full_operator(request):
+    if request.method != 'POST':
+        return JsonResponse({"status": "error", "message": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                # 1. Operator 核心表
+                op_sql = """
+                    INSERT INTO operator (name, rarity, class, branch, position, sex, image_url, avatar_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(op_sql, [
+                    data.get('name'), data.get('rarity'), data.get('class'), data.get('branch'),
+                    data.get('position'), data.get('sex'), data.get('image_url'), data.get('avatar_url')
+                ])
+                op_id = cursor.lastrowid
+                
+                # 2. profile
+                prof_sql = "INSERT INTO operator_profile (operator_id, illustrator, voice_actor, profile_text) VALUES (%s, %s, %s, %s)"
+                cursor.execute(prof_sql, [op_id, data.get('illustrator'), data.get('voice_actor'), data.get('profile_text')])
+                
+                # 3. tags
+                if 'tags' in data and data['tags']:
+                    tag_sql = "INSERT INTO op_tag (operator_id, tag_name) VALUES (%s, %s)"
+                    for tag in data['tags']:
+                        if tag.strip(): cursor.execute(tag_sql, [op_id, tag.strip()])
+                
+                # 4. states
+                if 'states' in data and data['states']:
+                    state_sql = """
+                        INSERT INTO op_state (operator_id, elite_level, max_level, hp, atk, def, res, redeploy_time, cost, block_count, atk_speed)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    for state in data['states']:
+                        cursor.execute(state_sql, [
+                            op_id, state.get('elite'), state.get('max_level'), 
+                            state.get('hp'), state.get('atk'), state.get('def'), state.get('res'),
+                            state.get('redeploy'), state.get('cost'), state.get('block'), state.get('atk_speed')
+                        ])
+                
+                # 5. materials
+                if 'materials' in data and data['materials']:
+                    mat_sql = "INSERT INTO op_material (operator_id, elite_level, material_id, count) VALUES (%s, %s, %s, %s)"
+                    for m in data['materials']:
+                        cursor.execute(mat_sql, [op_id, m.get('elite'), m.get('material_id'), m.get('count')])
+                
+                # 6. skills
+                if 'skills' in data and data['skills']:
+                    for sk in data['skills']:
+                        sk_sql = "INSERT INTO skill (operator_id, name, profile, icon_url) VALUES (%s, %s, %s, %s)"
+                        cursor.execute(sk_sql, [op_id, sk.get('name'), sk.get('description'), sk.get('icon')])
+                        sk_id = cursor.lastrowid
+                        if 'materials' in sk and sk['materials']:
+                            sk_mat_sql = "INSERT INTO skill_material (skill_id, mastery_level, material_id, count) VALUES (%s, %s, %s, %s)"
+                            for sm in sk['materials']:
+                                cursor.execute(sk_mat_sql, [sk_id, sm.get('mastery'), sm.get('material_id'), sm.get('count')])
+                
+                # 7. modules
+                if 'modules' in data and data['modules']:
+                    for mod in data['modules']:
+                        mod_sql = "INSERT INTO module (operator_id, name, type, mission_text, icon_url) VALUES (%s, %s, %s, %s, %s)"
+                        cursor.execute(mod_sql, [op_id, mod.get('name'), mod.get('type'), mod.get('mission'), mod.get('icon')])
+                        mod_id = cursor.lastrowid
+                        if 'materials' in mod and mod['materials']:
+                            mod_mat_sql = "INSERT INTO module_material (module_id, level, material_id, count) VALUES (%s, %s, %s, %s)"
+                            for mm in mod['materials']:
+                                cursor.execute(mod_mat_sql, [mod_id, mm.get('level'), mm.get('material_id'), mm.get('count')])
+                                
+        return JsonResponse({"status": "success", "message": f"幹員 {data.get('name')} 資料已成功同步 (ID: {op_id})"}, json_dumps_params={'ensure_ascii': False})
+    except Exception as e:
+        print(f"[Admin Error]: {str(e)}")
+        return JsonResponse({"status": "error", "message": f"資料寫入失敗: {str(e)}"}, status=500)
+

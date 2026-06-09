@@ -121,8 +121,11 @@
                         <span class="count-val">${m.usage_count}</span>
                         <span class="usage-label">OPERATORS</span>
                     </div>
-                    <div class="col-action">
+                    <div class="col-action" style="display: flex; gap: 8px;">
                         <button class="btn btn-outline btn-sm" onclick="showUsageReport(${m.id}, '${m.name}')">REPORT</button>
+                        ${(window.auth && window.auth.getUser() && window.auth.getUser().is_admin) ? `
+                            <button class="btn btn-red btn-sm" onclick="adminDeleteMaterial(${m.id})" style="border-color: var(--red); color: var(--red);">[ X ]</button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -186,6 +189,24 @@
     }
 
     window.showUsageReport = showUsageReport;
+
+    async function adminDeleteMaterial(id) {
+        if (!confirm("[ WARNING: 管理員操作 - 確定要從倉庫中永久移除此素材嗎？ ]")) return;
+        try {
+            const response = await fetch(`${API_BASE}/admin/materials/${id}/delete/`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert("物資檔案已移除");
+                fetchMaterials();
+            } else {
+                alert("操作失敗: " + result.message);
+            }
+        } catch (err) {
+            console.error("Delete material error:", err);
+        }
+    }
+
+    window.adminDeleteMaterial = adminDeleteMaterial;
 
     function setupListeners() {
         elements.searchInput?.addEventListener('input', (e) => {

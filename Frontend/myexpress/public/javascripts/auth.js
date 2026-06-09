@@ -94,25 +94,22 @@
 
             const user = this.getUser();
             if (user) {
-                const adminLink = user.is_admin ? `<span onclick="location.href='/admin_panel.html'" style="cursor:pointer; font-size:0.6rem; color:#f0c14b; text-decoration:underline;">[ADMIN PANEL]</span>` : '';
+                const adminLink = user.is_admin ? `<button class="btn btn-outline" onclick="location.href='/admin_panel.html'" style="color:#f0c14b; border-color:#f0c14b;"><span class="icon">⚙</span> ADMIN</button>` : '';
                 container.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.05); padding:5px 12px; border:1px solid #333;">
-                        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-                            <span style="font-size:0.6rem; color:#29b6f6; font-weight:800; letter-spacing:1px;">ACCESS GRANTED ${user.is_admin ? ' (ADMIN)' : ''}</span>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                ${adminLink}
-                                <span onclick="location.href='/profile.html'" style="cursor:pointer; font-weight:700; color:#fff;">${user.nickname}</span>
-                            </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        ${adminLink}
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; background:rgba(255,255,255,0.05); padding:2px 10px; border:1px solid #444; border-radius: 4px; cursor: pointer;" onclick="location.href='/profile.html'">
+                            <span style="font-size:0.7rem; color:var(--teal); font-weight:800;">${user.nickname}</span>
+                            <span style="font-size:0.5rem; color:var(--muted);">${user.is_admin ? 'ADMINISTRATOR' : 'OPERATOR'}</span>
                         </div>
-                        <button onclick="auth.logout()" style="background:transparent; border:1px solid #d32f2f; color:#d32f2f; padding:4px 8px; font-size:0.7rem; font-weight:800; cursor:pointer;">LOGOUT</button>
+                        <button class="btn btn-filled" onclick="auth.logout()" style="padding:4px 8px; font-size:0.6rem;">LOGOUT</button>
                     </div>
                 `;
             } else {
                 container.innerHTML = `
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="location.href='/login.html'" style="background:transparent; border:1px solid #444; color:#aaa; padding:6px 15px; font-weight:700; cursor:pointer;">LOGIN</button>
-                        <button onclick="location.href='/register.html'" style="background:#29b6f6; border:none; color:#000; padding:6px 15px; font-weight:800; cursor:pointer;">REGISTER</button>
-                    </div>
+                    <button class="btn btn-outline" onclick="location.href='/admin_panel.html'"><span class="icon">⚙</span> ADMIN</button>
+                    <button class="btn btn-filled" onclick="location.href='/login.html'"><span class="icon">👤</span> LOGIN</button>
+                    <button class="btn btn-outline" onclick="location.href='/register.html'" style="margin-left: 8px;">SIGN UP</button>
                 `;
             }
         }

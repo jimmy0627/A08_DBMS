@@ -94,15 +94,61 @@ function renderComments(comments) {
     }
 
     comments.forEach(c => {
+        const user = auth.getUser();
+        const isAdmin = user && user.is_admin;
+        const currentUserId = user ? user.user_id : null;
+        
         const item = document.createElement('div');
         item.className = 'comment-item';
+        item.style.position = 'relative';
+        
+        let deleteBtn = '';
+        if (isAdmin) {
+             const commentText = c.text.replace(/"/g, '&quot;');
+             deleteBtn = `<button onclick="adminDeleteComment('${commentText}')" style="position: absolute; right: 0; top: 0; background: none; border: none; color: var(--red); cursor: pointer; font-size: 0.8rem; font-weight: 800;">[ DELETE ]</button>`;
+        }
+
         item.innerHTML = `
             <div class="comment-user">@${c.nickname}</div>
             <div class="comment-content">${c.text}</div>
+            ${deleteBtn}
         `;
         list.appendChild(item);
     });
 }
+
+/**
+ * 管理員刪除留言
+ */
+async function adminDeleteComment(commentText) {
+    if (!confirm("[ WARNING: 管理員操作 - 確定要刪除此條通訊紀錄嗎？ ]")) return;
+
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const guideId = urlParams.get('id');
+        
+        const response = await fetch(`/api/admin/guides/comments/delete/`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                guide_id: guideId,
+                comment_text: commentText
+            })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            alert("通訊紀錄已抹除");
+            const user = auth.getUser();
+            loadGuideDetail(guideId, user ? user.user_id : null);
+        } else {
+            alert("刪除失敗: " + result.message);
+        }
+    } catch (err) {
+        console.error("Delete comment error:", err);
+    }
+}
+
+window.adminDeleteComment = adminDeleteComment;
 
 /**
  * 發布留言

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guides List // Rhodes Island Database</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <script src="/javascripts/auth.js"></script>
+  <style>
+    .guide-row {
+      display: flex;
+      align-items: center;
+      padding: 20px 24px;
+      background: #151515;
+      margin-bottom: 2px;
+      gap: 24px;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .guide-row:hover {
+      background: #1a1a1a;
+      border-left: 4px solid var(--teal);
+      padding-left: 20px;
+    }
+    .target-stage {
+      width: 100px;
+      font-weight: 900;
+      color: var(--teal);
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+    .guide-info {
+      flex: 1;
+    }
+    .guide-title {
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+    .guide-meta {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .guide-meta span {
+      color: #777;
+    }
+    .status-tag {
+      color: var(--teal);
+      font-size: 0.65rem;
+      font-weight: 900;
+      border: 1px solid var(--teal);
+      padding: 2px 8px;
+      letter-spacing: 0.1em;
+      margin-right: 20px;
+    }
+    .btn-read {
+      background: transparent;
+      border: 1px solid #444;
+      color: #aaa;
+      padding: 6px 16px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+    }
+    .loading-state {
+      padding: 60px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="logo"><a href="/">RHODES ISLAND DATABASE</a></div>
+      <div class="header-actions">
+        <!-- Auth will handle this -->
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <div class="db-header" style="margin-bottom: 30px;">
+        <div class="title-group">
+          <h1>戰術指南</h1>
+          <p class="subtitle">GUIDES // 玩家攻略列表</p>
+          <p style="margin-top: 10px; color: var(--muted); font-size: 0.85rem;">「查閱精英博士撰寫的作戰日誌，學習核心機制與應對方案。」</p>
+        </div>
+      </div>
+
+      <div id="guides-list-container">
+        <div class="loading-state">[ FETCHING DATA // 正在同步數據 ]</div>
+      </div>
+    </main>
+  </div>
+  <script src="/javascripts/guides_list.js"></script>
+</body>
+</html>

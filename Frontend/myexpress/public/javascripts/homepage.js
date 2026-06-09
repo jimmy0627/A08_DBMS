@@ -58,34 +58,44 @@
         const [operatorsPayload, stagesPayload, statsPayload] = await Promise.all([
           fetchApi('/operators/list/'),
           fetchApi('/stages/'),
-          fetchApi('/stats/global/')
+          fetchApi('/stats/')
         ]);
 
         const operators = unwrapList(operatorsPayload);
         const stages = unwrapList(stagesPayload);
-        const stats = statsPayload.status === 'success' ? statsPayload.counts : { operators: 0, materials: 0, guides: 0 };
+        const stats = statsPayload.status === 'success' ? statsPayload.data : { total_operators: 0, total_materials: 0, total_guides: 0, total_stages: 0 };
 
         // 2. 更新簡報
         if (elements.briefing) {
             elements.briefing.innerHTML = `正在連線至羅德島數據庫...<br>
-            當前已載入 <span style="color:var(--teal); font-weight:800">${stats.operators}</span> 名幹員檔案、
-            <span style="color:var(--teal); font-weight:800">${stats.materials}</span> 種物資數據與 
-            <span style="color:var(--teal); font-weight:800">${stats.guides}</span> 份戰術指南。`;
+            當前已載入 <span style="color:var(--teal); font-weight:800">${stats.total_operators}</span> 名幹員檔案、
+            <span style="color:var(--teal); font-weight:800">${stats.total_materials}</span> 種物資數據與 
+            <span style="color:var(--teal); font-weight:800">${stats.total_guides}</span> 份戰術指南。`;
         }
 
-        // 3. 渲染「活動/重點作戰」看板 (取最後一個關卡作為當前活動)
-        if (elements.eventSection && stages.length > 0) {
-            const currentStage = stages[stages.length - 1];
+        // 3. 渲染「數據庫總覽」看板
+        if (elements.eventSection) {
             elements.eventSection.innerHTML = `
-                <div class="event-card" onclick="location.href='/operators?search=${currentStage.stage_id}'" style="cursor:pointer">
+                <div class="event-card">
                   <div class="event-meta">
-                    <span class="count">${stats.operators}</span>
+                    <span class="count">${stats.total_operators}</span>
                     <p>已載入幹員 / OPS</p>
-                    <span class="status-badge" style="background:var(--teal); color:#000;">SYSTEM ONLINE</span>
+                    <span class="status-badge" style="background:var(--teal); color:#000;">SYNC_OK</span>
                   </div>
-                  <div class="event-content">
-                    <h2>${currentStage.stage_id} // 戰術目標</h2>
-                    <p class="event-desc">${currentStage.description || '點擊查看推薦幹員及掉落數據'} <br>目前共有 ${stats.guides} 篇相關攻略。</p>
+                  <div class="event-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h2 style="color:var(--teal); font-size: 0.9rem; margin-bottom: 12px; font-weight:900;">DATABASE OVERVIEW // 實時數據庫總覽</h2>
+                        <div style="font-size: 0.8rem; color: var(--muted); line-height: 1.8;">
+                             [ OPERATORS ] : ${stats.total_operators} <br>
+                             [ MATERIALS ] : ${stats.total_materials} <br>
+                             [ GUIDES ] : ${stats.total_guides} <br>
+                             [ STAGES ] : ${stats.total_stages}
+                        </div>
+                    </div>
+                    <div style="border-left: 1px solid var(--border); padding-left: 20px;">
+                        <div style="font-size: 0.7rem; color: var(--teal); font-weight: 800; margin-bottom: 8px;">PRTS_SYSTEM_INFO</div>
+                        <p class="event-desc" style="font-size: 0.75rem;">數據庫狀態穩定。所有核心模塊已掛載，當前系統正在監控 ${stats.total_stages} 個作戰區域的戰術變化。</p>
+                    </div>
                   </div>
                 </div>
             `;
@@ -93,28 +103,36 @@
 
         // 4. 渲染「最新幹員」 (取前 6 個以增加豐富度)
         if (elements.operatorsList) {
-            elements.operatorsList.innerHTML = operators.slice(0, 6).map(op => `
+            elements.operatorsList.innerHTML = operators.slice(0, 6).map(op => {
+                const avatarUrl = op.avatar_url || `/static/images/avatars/default.png`;
+                return `
                 <div class="op-card" onclick="location.href='/operator/${op.operator_id}'" style="cursor:pointer">
-                  <div class="op-thumb" style="background-image: url('/static/images/operators/${op.operator_id}.png'); background-size: cover; display: flex; align-items: center; justify-content: center; background-position: top center;">
+                  <div class="op-thumb" style="background-image: url('${avatarUrl}'); background-size: cover; display: flex; align-items: center; justify-content: center; background-position: top center;">
                     <div style="position:absolute; bottom:0; width:100%; height:4px; background:var(--teal); opacity:0.8"></div>
                   </div>
                   <div class="op-tag">${(op.class || 'UNCODED').toUpperCase()} // PERSONNEL</div>
                   <p>${op.name}</p>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
-        // 5. 渲染「攻略推薦」 (從關卡中抽樣顯示)
+        // 5. 渲染「功能導覽」
         if (elements.guideGrid) {
-            const sampleStages = stages.slice(0, 2);
-            elements.guideGrid.innerHTML = sampleStages.map(st => `
-                <article class="guide-card panel" onclick="location.href='/operators?search=${st.stage_id}'" style="cursor:pointer">
-                  <div class="card-header">關卡 // STAGE</div>
-                  <h3>${st.stage_id}</h3>
-                  <p>目標地區: ${st.map_name || '未知區域'}</p>
+            elements.guideGrid.innerHTML = `
+                <article class="guide-card panel" onclick="location.href='/stages_list.html'" style="cursor:pointer">
+                  <div class="card-header">作戰資料庫 // STAGES</div>
+                  <h3>關卡詳細介紹</h3>
+                  <p>獲取各區域作戰目標、掉落物資與能源消耗數據。</p>
                   <span class="arrow">›</span>
                 </article>
-            `).join('');
+                <article class="guide-card panel" onclick="location.href='/guides_list.html'" style="cursor:pointer">
+                  <div class="card-header">戰術指南 // GUIDES</div>
+                  <h3>玩家攻略列表</h3>
+                  <p>查閱精英博士撰寫的作戰日誌，學習核心機制與應對方案。</p>
+                  <span class="arrow">›</span>
+                </article>
+            `;
         }
 
         if (elements.featuredGuide) {
@@ -124,7 +142,6 @@
                   <h3>羅德島數據庫同步完成</h3>
                   <p>當前資料庫版本: v2.0.4.5 // 伺服器狀態: 穩定</p>
                 </div>
-                <button class="btn-read-more" onclick="location.href='/operators'">READ ALL FILES</button>
             `;
         }
 
@@ -134,7 +151,40 @@
       }
     }
 
+    async function checkSystemConnection() {
+      const statusBox = document.getElementById('connection-status');
+      if (!statusBox) return;
+
+      const statusText = statusBox.querySelector('.status-text');
+      const connText = statusBox.querySelector('.conn-text');
+
+      try {
+        const response = await fetch(`${API_BASE}/health/`);
+        if (response.ok) {
+          statusText.textContent = 'ONLINE';
+          statusText.style.color = 'var(--teal)';
+          statusText.classList.remove('blink-red');
+
+          connText.textContent = 'STABLE';
+          connText.style.color = 'var(--teal)';
+          connText.classList.remove('blink-red');
+        } else {
+          throw new Error('Server issues');
+        }
+      } catch (err) {
+        statusText.textContent = 'OFFLINE';
+        statusText.style.color = '#D32F2F';
+        statusText.classList.add('blink-red');
+
+        connText.textContent = 'LOST';
+        connText.style.color = '#D32F2F';
+        connText.classList.add('blink-red');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         loadHomepageData();
+        checkSystemConnection();
+        setInterval(checkSystemConnection, 15000);
     });
 })();

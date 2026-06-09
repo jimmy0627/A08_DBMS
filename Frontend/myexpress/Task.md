@@ -9,7 +9,17 @@
 
 ## 📋 任務清單
 
-### 1. 幹員列表頁面升級 (Operator List v2)
+### 1. 系統導覽與全域連結修正
+- [ ] **全域導航補完**：
+    - 在所有頁面的 `header.topbar` 中，確保 `logo` (`RHODES ISLAND DATABASE`) 連結回首頁 `/`。
+    - 實作 Admin Panel 永久入口：修正 `auth.js` 或頁面 HTML，確保具備權限時在 Topbar 顯示 Admin 入口。
+- [ ] **首頁推薦區塊 (Recommendation) 實作**：
+    - 將首頁左側建議區塊第一個 Card 改為「關卡圖鑑列表入口」 (連結至特定過濾條件或新頁面)。
+    - 將第二個 Card 改為「玩家攻略列表入口」。
+    - 刪除冗餘的「Read all file」按鈕。
+
+### 2. 幹員列表頁面數據顯示修復
+- [ ] **數值顯示恢復**：修正 `operators.js` 邏輯，確保幹員卡片右側的 HP、ATK、DEF 等數值正確顯示而非 `--`。
 - [ ] **數據模型適配**：修改 `operators.js` 以連結 `operator` 基礎表與 `op_state` 狀態表。
 - [ ] **新增基礎欄位**：在幹員卡片中加入 `branch` (分支) 與 `sex` (性別) 顯示。
 - [ ] **精英化切換功能 (Elite Toggle)**：
@@ -17,7 +27,7 @@
     - 點擊時同步更新 HP, ATK, DEF, RES 等戰鬥數值。
 - [ ] **標籤系統 (Tag System)**：將 `op_tag` 數據轉化為卡片上的視覺小標籤 (如：輸出、生存)。
 
-### 2. 模組系統實作 (Module System)
+### 3. 模組系統實作 (Module System)
 - [ ] **模組列表視圖**：設計並實作幹員模組顯示區。
 - [ ] **詳細資料展示**：顯示模組類型 (X/Y/D) 與 `unlock_mission` (解鎖任務)。
 - [ ] **需求素材**：連結 `module_material` 與 `material` 表，列出升級所需素材清單。

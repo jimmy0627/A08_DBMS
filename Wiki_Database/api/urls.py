@@ -11,6 +11,7 @@ urlpatterns = [
     
     # 攻略系統
     path('stages/<str:stage_id>/guides/', views.get_guides_by_stage),
+    path('guides/list/', views.list_guides),
     path('guides/create/', views.create_guide),
     path('guides/<int:guide_id>/detail/', views.get_guide_detail),
     path('guides/<int:guide_id>/delete/', views.delete_guide),
@@ -52,6 +53,7 @@ urlpatterns = [
     path('guides/<int:guide_id>/comments/create/', views.post_guide_comment),
     # 刪除攻略留言
     path('guides/<int:guide_id>/comments/delete/', views.delete_guide_comment),
+    path('admin/guides/comments/delete/', views.admin_delete_comment),
     
     # 載入幹員詳細資料
     path('operator/<str:op_id>/detail/', views.get_operator_detail),
@@ -61,6 +63,10 @@ urlpatterns = [
     
     # 升級計畫計算 API
     path('users/<int:user_id>/operators/<int:op_id>/calc-upgrade/', views.calc_upgrade_plan),
+    
+    # 系統相關 (健康檢查與統計)
+    path('health/', views.health_check),
+    path('stats/', views.get_system_stats),
     
     # 全局統計數據
     path('stats/global/', views.get_global_stats),
@@ -77,4 +83,8 @@ urlpatterns = [
     path('admin/materials/create/', views.admin_create_material),
     path('admin/materials/<int:mat_id>/delete/', views.admin_delete_material),
     path('admin/stages/<str:stage_id>/delete/', views.admin_delete_stage),
+    # 資深管理員：全功能幹員檔案錄入
+    path('admin/operators/create_full/', views.create_full_operator),
+    # 素材管理
+    path('materials/list/', views.get_materials_list),
 ]
