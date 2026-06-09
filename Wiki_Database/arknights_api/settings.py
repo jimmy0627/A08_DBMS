@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'arkwikidatabase',   
         'USER': 'root',                
-        'PASSWORD': 'jimmy0627',         
+        'PASSWORD': 'Tt0925700515',         
         'HOST': '127.0.0.1',           
         'PORT': '3306',                
         'OPTIONS': {
@@ -123,7 +123,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]

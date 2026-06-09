@@ -7,6 +7,7 @@ const app = express();
 // 1. 設定靜態檔案資料夾 (讓 Express 讀得到你的 HTML, CSS, JS)
 // 假設你的 HTML 放在 public 資料夾下
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/static', express.static(path.join(__dirname, '../../Wiki_Database/static')));
 
 // 2. 建立 API 橋接 (API Bridge)
 // 只要前端發送的網址開頭是 /api，Express 就會自動幫你轉發給 Django

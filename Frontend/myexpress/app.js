@@ -42,7 +42,7 @@ app.use(cookieParser());
 
 // 靜態檔案路徑
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/static', express.static('D:/VS new clone/A08_DBMS/Wiki_Database/static'));
+app.use('/static', express.static(path.join(__dirname, '../../Wiki_Database/static')));
 
 // 路由
 app.use('/', indexRouter);
