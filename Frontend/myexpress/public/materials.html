@@ -175,6 +175,9 @@
   <div class="page-shell">
     <header class="topbar">
       <div class="logo"><a href="/">RHODES ISLAND DATABASE</a></div>
+      <div class="header-search">
+        <input type="text" placeholder="搜尋幹員、素材、關卡...">
+      </div>
       <div class="header-actions">
         <!-- Auth will handle this -->
       </div>
@@ -201,8 +204,8 @@
           <div class="list-header">
             <div>ITEM // 物資識別</div>
             <div>BEST DROP // 推薦獲取途徑</div>
-            <div>USAGE // 需藥的人數</div>
-            <div>ACTION // 需要的幹員</div>
+            <div>// 用於菁英化的人數</div>
+            <div>// 需要的幹員列表</div>
           </div>
           <div id="materials-container">
             <!-- Data will be injected here -->
@@ -235,6 +238,47 @@
       </div>
       <div class="modal-footer" style="padding: 12px 20px; background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05); text-align: right; font-size: 0.65rem; color: var(--muted);">
         PRTS SYSTEM // PERSONNEL DATABASE INTEGRITY VERIFIED
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Edit Modal -->
+  <div id="admin-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; backdrop-filter: blur(8px);">
+    <div class="modal-panel" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; background: #0a0a0a; border: 1px solid var(--border); border-top: 4px solid var(--teal);">
+      <div class="modal-header" style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <h2 style="margin: 0; color: var(--text); font-size: 1.1rem; font-weight: 800;">EDIT MATERIAL // 編輯物資檔案</h2>
+        <p style="margin: 4px 0 0; color: var(--teal); font-size: 0.6rem; letter-spacing: 0.15em;">ADMINISTRATION TERMINAL // ASSET OVERRIDE</p>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <form id="admin-edit-form">
+          <input type="hidden" name="material_id">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; color: var(--teal); font-size: 0.7rem; margin-bottom: 8px; font-weight: 800;">MATERIAL NAME // 素材名稱</label>
+            <input type="text" name="name" required style="width: 100%; background: rgba(255,255,255,0.05); border: none; border-bottom: 2px solid var(--border); color: #fff; padding: 10px; font-family: inherit; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; color: var(--teal); font-size: 0.7rem; margin-bottom: 8px; font-weight: 800;">RARITY TIER // 稀有度分級</label>
+            <select name="rarity" style="width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; font-family: inherit;">
+              <option value="1">1 // White (基礎)</option>
+              <option value="2">2 // Green (普通)</option>
+              <option value="3">3 // Blue (稀有)</option>
+              <option value="4">4 // Purple (罕見)</option>
+              <option value="5">5 // Gold (極其罕見)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label style="display: block; color: var(--teal); font-size: 0.7rem; margin-bottom: 8px; font-weight: 800;">ICON URL // 圖片路徑</label>
+            <input type="text" name="icon_url" style="width: 100%; background: rgba(255,255,255,0.05); border: none; border-bottom: 2px solid var(--border); color: #fff; padding: 10px; font-family: inherit;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button type="submit" class="btn btn-teal" style="width: 100%; padding: 12px; font-weight: 900;">[ COMMIT CHANGES // 提交修改 ]</button>
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn btn-red" id="admin-delete-btn" style="flex: 1; padding: 10px; font-size: 0.75rem; border: 1px solid var(--red); background: transparent; color: var(--red); font-weight: 800;">[ DELETE MATERIAL // 抹除物資 ]</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('admin-modal').style.display='none'" style="flex: 1; padding: 10px; font-size: 0.75rem;">CANCEL // 取消</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -1,0 +1,100 @@
+{
+  "name": "TEST_幹員_新增完整資料",
+  "rarity": 6,
+  "class": "術師",
+  "branch": "核心術師",
+  "position": "遠程位",
+  "sex": "女",
+  "portrait_url": "https://example.com/image/test_op.png",
+  "avatar_url": "https://example.com/avatar/test_op.png",
+
+  "illustrator": "測試繪師",
+  "voice_actor": "測試聲優",
+  "lore_text": "這是一個用於 Postman 測試的虛構幹員，請勿在正式環境中使用。",
+
+  "tags": ["爆發", "遠程", "輸出"],
+
+  "states": [
+    {
+      "elite_stage": 0,
+      "max_level": 50,
+      "min_hp": 800,  "max_hp": 1000,
+      "min_atk": 400, "max_atk": 500,
+      "min_def": 80,  "max_def": 100,
+      "min_res": 8,   "max_res": 10,
+      "cost": 22,
+      "stop_amount": 1,
+      "deploy_cd": 70,
+      "atk_cd": 2.7
+    },
+    {
+      "elite_stage": 1,
+      "max_level": 70,
+      "min_hp": 1200, "max_hp": 1500,
+      "min_atk": 600, "max_atk": 750,
+      "min_def": 120, "max_def": 150,
+      "min_res": 12,  "max_res": 15,
+      "cost": 24,
+      "stop_amount": 1,
+      "deploy_cd": 70,
+      "atk_cd": 2.7
+    },
+    {
+      "elite_stage": 2,
+      "max_level": 90,
+      "min_hp": 1700, "max_hp": 2100,
+      "min_atk": 840, "max_atk": 1050,
+      "min_def": 160, "max_def": 200,
+      "min_res": 16,  "max_res": 20,
+      "cost": 26,
+      "stop_amount": 1,
+      "deploy_cd": 70,
+      "atk_cd": 2.7
+    }
+  ],
+
+  "materials": [
+    { "elite_stage": 1, "material_id": 30, "amount": 3 },
+    { "elite_stage": 1, "material_id": 16, "amount": 5 },
+    { "elite_stage": 2, "material_id": 1,  "amount": 4 },
+    { "elite_stage": 2, "material_id": 17, "amount": 3 }
+  ],
+
+  "skills": [
+    {
+      "skill_name": "TEST技能一",
+      "skill_profile": "技能一的描述文字，用於測試。",
+      "icon_url": "https://example.com/skill/test_sk1.png",
+      "materials": [
+        { "level": 1, "material_id": 35, "amount": 3 },
+        { "level": 2, "material_id": 22, "amount": 5 },
+        { "level": 3, "material_id": 1,  "amount": 6 }
+      ]
+    },
+    {
+      "skill_name": "TEST技能二",
+      "skill_profile": "技能二的描述文字，用於測試。",
+      "icon_url": "https://example.com/skill/test_sk2.png",
+      "materials": [
+        { "level": 1, "material_id": 34, "amount": 4 },
+        { "level": 2, "material_id": 39, "amount": 5 },
+        { "level": 3, "material_id": 15, "amount": 3 }
+      ]
+    }
+  ],
+
+  "modules": [
+    {
+      "name": "TEST模組-X型",
+      "module_type": "X",
+      "unlock_mission": "完成 5 次使用本幹員的作戰",
+      "icon_url": "https://example.com/module/test_mod_x.png",
+      "materials": [
+        { "level": 1, "material_id": 30, "amount": 2 },
+        { "level": 2, "material_id": 49, "amount": 4 },
+        { "level": 3, "material_id": 1,  "amount": 3 }
+      ]
+    }
+  ]
+}
+

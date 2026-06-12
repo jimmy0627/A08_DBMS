@@ -64,7 +64,22 @@
                                 ${adminBtn}
                             </div>
                         </section>
-                        ... (略)
+                        <section class="stage-info-panel panel">
+                            <div class="panel-title">[ 作戰情報 // INTELLIGENCE ]</div>
+                            <div style="padding: 24px;">
+                                <div class="info-row">
+                                    <span class="info-label">理智消耗</span>
+                                    <span class="info-value" style="color: var(--gold); font-size: 1.2rem;">${stage.cost} <small style="font-size: 0.7rem;">SAN</small></span>
+                                </div>
+                                <div class="info-row" style="margin-top: 20px;">
+                                    <span class="info-label">作戰說明</span>
+                                    <p style="color: #ccc; font-size: 0.9rem; margin-top: 10px; line-height: 1.8;">
+                                        ${stage.description || '暫無機密說明資料。'}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
                 `;
 
                 if (user.is_admin) {

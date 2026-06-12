@@ -13,17 +13,6 @@
         tierButtons: document.querySelectorAll('.tier-btn')
     };
 
-    /**
-     * Determine Tier based on material name (Mock logic based on Arknights patterns)
-     */
-    function getTierFromName(name) {
-        if (['D32鋼', '聚合劑', '雙極納米片', '燒結核凝晶', '晶體電子單元'].includes(name)) return 5;
-        if (name.includes('塊') || name.includes('陣列') || ['三水錳礦', '五水研磨石', 'RMA70-24', '白馬醇', '改良裝置'].includes(name)) return 4;
-        if (name.includes('組') || name.includes('酮凝集') || name.includes('扭轉醇') || name.includes('裝置')) return 3;
-        if (name.includes('固源岩') || name.includes('異鐵') || name.includes('聚酸酯') || name.includes('糖')) return 2;
-        return 1;
-    }
-
     function getIconPathFromName(name) {
         const mapping = {
             'D32鋼': 'd32_steel.png',
@@ -64,7 +53,7 @@
             if (result.status === 'success') {
                 state.allData = result.data.map(m => ({
                     ...m,
-                    tier: getTierFromName(m.name)
+                    tier: m.rarity || 1
                 }));
                 renderList();
             } else {
@@ -124,7 +113,12 @@
                     <div class="col-action" style="display: flex; gap: 8px;">
                         <button class="btn btn-outline btn-sm" onclick="showUsageReport(${m.id}, '${m.name}')">REPORT</button>
                         ${(window.auth && window.auth.getUser() && window.auth.getUser().is_admin) ? `
-                            <button class="btn btn-red btn-sm" onclick="adminDeleteMaterial(${m.id})" style="border-color: var(--red); color: var(--red);">[ X ]</button>
+                            <button class="btn btn-red btn-sm btn-admin-manage" 
+                                    data-id="${m.id}" 
+                                    data-name="${m.name}" 
+                                    data-rarity="${m.rarity}" 
+                                    data-icon="${m.icon_url || ''}"
+                                    style="border-color: var(--red); color: var(--red);">[ X ]</button>
                         ` : ''}
                     </div>
                 </div>
@@ -191,6 +185,7 @@
     window.showUsageReport = showUsageReport;
 
     async function adminDeleteMaterial(id) {
+        // This function is now handled via the Admin Modal, keeping for backward compatibility if needed
         if (!confirm("[ WARNING: 管理員操作 - 確定要從倉庫中永久移除此素材嗎？ ]")) return;
         try {
             const response = await fetch(`${API_BASE}/admin/materials/${id}/delete/`, { method: 'DELETE' });
@@ -206,7 +201,76 @@
         }
     }
 
-    window.adminDeleteMaterial = adminDeleteMaterial;
+    function setupAdminTerminal() {
+        const modal = document.getElementById('admin-modal');
+        const form = document.getElementById('admin-edit-form');
+        const deleteBtn = document.getElementById('admin-delete-btn');
+
+        if (!modal || !form) return;
+
+        // Use event delegation for the [ X ] buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-admin-manage')) {
+                const btn = e.target;
+                const { id, name, rarity, icon } = btn.dataset;
+
+                form.material_id.value = id;
+                form.name.value = name;
+                form.rarity.value = rarity || 1;
+                form.icon_url.value = icon || '';
+
+                modal.style.display = 'block';
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const body = {
+                material_id: parseInt(form.material_id.value),
+                name: form.name.value,
+                rarity: parseInt(form.rarity.value),
+                icon_url: form.icon_url.value
+            };
+
+            try {
+                const resp = await fetch(`${API_BASE}/admin/materials/update/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    modal.style.display = 'none';
+                    fetchMaterials();
+                } else {
+                    alert('更新失敗: ' + data.message);
+                }
+            } catch (err) { alert('連線異常'); }
+        });
+
+        deleteBtn.addEventListener('click', async () => {
+            const id = form.material_id.value;
+            const name = form.name.value;
+            if (!confirm(`[ CRITICAL WARNING ]\n確定要抹除物資「${name}」的所有數據？\n此動作將導致所有關卡掉落與幹員需求數據失效。`)) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/admin/materials/delete/`, {
+                    method: 'POST', // Backend admin_delete_material now handles POST with body
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ material_id: parseInt(id) })
+                });
+                const data = await resp.json();
+                if (data.status === 'success') {
+                    alert(data.message);
+                    modal.style.display = 'none';
+                    fetchMaterials();
+                } else {
+                    alert('刪除失敗: ' + data.message);
+                }
+            } catch (err) { alert('連線異常'); }
+        });
+    }
 
     function setupListeners() {
         elements.searchInput?.addEventListener('input', (e) => {
@@ -226,6 +290,7 @@
 
     async function init() {
         setupListeners();
+        setupAdminTerminal();
         await fetchMaterials();
     }
 

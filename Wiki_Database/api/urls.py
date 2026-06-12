@@ -81,6 +81,8 @@ urlpatterns = [
     path('admin/operators/create/', views.admin_create_operator),
     path('admin/operators/<int:op_id>/delete/', views.admin_delete_operator),
     path('admin/materials/create/', views.admin_create_material),
+    path('admin/materials/update/', views.admin_update_material),
+    path('admin/materials/delete/', views.admin_delete_material),
     path('admin/materials/<int:mat_id>/delete/', views.admin_delete_material),
     path('admin/stages/<str:stage_id>/delete/', views.admin_delete_stage),
     # 資深管理員：全功能幹員檔案錄入
